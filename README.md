@@ -2,16 +2,22 @@
 
 Python reader/writer for Mobile Driving License and eIDAS MDOC and MSO.
 
-## Specifications
+> This project is an experimental proposal born for educational purposes. Please do not consider it as usable before the release 0.6.0.
+
+## Specifications and Resources
 
 - [ISO 18013-5 - ISO-compliant driving licence — Mobile driving licence (mDL) application](https://www.iso.org/standard/69084.html)
 - [RFC 8949 - Concise Binary Object Representation (CBOR)](https://datatracker.ietf.org/doc/html/rfc8949)
 - [RFC 8152 - CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc8152)
+- [IANA Registry - Concise Binary Object Representation (CBOR) Tags](https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml)
 
 ## Scope 
 
-pyMDL-MDOC isa [cbor2](https://github.com/agronholm/cbor2) wrapper that 
-allows reading, writing and validation of MDOC or MSO type binary files, 
+pyMDL-MDOC is a 
+[cbor2](https://github.com/agronholm/cbor2) 
+and 
+[pycose](https://github.com/TimothyClaeys/pycose) 
+wrapper that parses, creates and validates MDOC or MSO binaries, 
 as defined in ISO 18013-5.
 
 ## Setup
