@@ -90,7 +90,7 @@ The `x5chain` element has the temporary identifer 33 registered in the IANA regi
 
 Please note: ISO 18013-5 uses draft not standards yet, like:
 
- - draft-ietf-cbor-date-tag-01
+ - draft-ietf-cbor-date-tag-01 -> became an RFC here: https://www.rfc-editor.org/rfc/rfc8943.html
  - draft-ietf-cose-x509-08	
 
 
