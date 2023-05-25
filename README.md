@@ -1,6 +1,6 @@
-# pyMDL-MDOC
+# pyMDOC-CBOR
 
-Python reader/writer for Mobile Driving License and eIDAS MDOC and MSO.
+Python parser and writer for eIDAS MDOC CBOR.
 
 > This project is an experimental proposal born for educational purposes. Please do not consider it as usable before the release 0.6.0.
 
@@ -13,11 +13,11 @@ Python reader/writer for Mobile Driving License and eIDAS MDOC and MSO.
 
 ## Scope 
 
-pyMDL-MDOC is a 
+pyMDOC-CBOR is a 
 [cbor2](https://github.com/agronholm/cbor2) 
 and 
 [pycose](https://github.com/TimothyClaeys/pycose) 
-wrapper that parses, creates and validates MDOC or MSO binaries, 
+wrapper that parses, creates and validates MDOC CBOR encoded binaries, 
 as defined in ISO 18013-5.
 
 ## Setup
