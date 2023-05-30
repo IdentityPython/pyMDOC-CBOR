@@ -11,6 +11,10 @@ Python parser and writer for eIDAS MDOC CBOR.
 - [RFC 8152 - CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc8152)
 - [IANA Registry - Concise Binary Object Representation (CBOR) Tags](https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml)
 
+Tag 33 in MSO:
+
+- [RFC 9360 CBOR Object Signing and Encryption (COSE) - Header Parameters for Carrying and Referencing X.509 Certificates](https://www.rfc-editor.org/rfc/rfc9360.html)
+
 ## Scope 
 
 pyMDOC-CBOR is a 
@@ -50,7 +54,26 @@ export ISSUED_MDOC="a36776657273696f6e63312e3069646f63756d656e747381a367646f6354
 echo $ISSUED_MDOC | xxd -r -ps | python3 -m cbor2.tool --pretty
 ````
 
+### using cbor-diag
+
+#### install cbor-diag
+````
+pip install cbor-diag
+````
+
+#### print a cbor representation
+````
+from cbor_diag import *
+
+encoded = bytes.fromhex(ISSUED_MDOC)
+print(cbor2diag(encoded))
+````
+
 Other examples at [cbor official documentation](https://github.com/agronholm/cbor2).
+
+## Utilities
+
+- [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py/tree/main/python/cbor_diag)-
 
 ## Authors and contributors
 

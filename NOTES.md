@@ -26,8 +26,8 @@ Where a single `$doc` it something like as follow.
                 ...
             ]
     'issuerAuth': ->  Contains the mobile security object (MSO) for issuer data authentication, an Array of the elements below
-        cbor({1: -7})
-        {33: cbor tag( -17)}
+        cbor({1: -7}) # Protected Header
+        {33: cbor tag( -17)} # Unprotected header -> the x5chain element has the temporary identifer 33 registered in the IANA registry.
         Tag(24, cbor(payload) -> It's a MobileSecurityObjectBytes
             {
              'version': '1.0',
@@ -112,11 +112,29 @@ corresponding digest values in the MSO.
 #### 
 
 ````
+import binascii 
+import cbor2
+
+from pycose.keys import CoseKey
+from pycose.messages.sign1message import Sign1Message
+
+
 BIN_ISSUED_MDOC = binascii.unhexlify(ISSUED_MDOC)
 do = cbor2.loads(BIN_ISSUED_MDOC)
 
+# do
+# {'version': '1.0', 'documents': ..., 'status': 0}
+
 # here the mDocs
 do['documents']
+
+# do['documents'][0].keys()
+# dict_keys(['docType', 'issuerSigned', 'deviceSigned']
+
+# {'docType': 'org.iso.18013.5.1.mDL', 'issuerSigned': {'nameSpaces': {'org.iso.18013.5.1': [ ...], }, 'issuerAuth': ...}
+
+# do['documents'][0]['issuerSigned']['nameSpaces']['org.iso.18013.5.1'][1]
+# CBORTag(24, b'\xa4hdigestID\x03frandomX \xb2?b~\x89\x99\xc7\x06\xdf\x0c\nN\xd9\x8a\xd7J\xf9\x88\xafa\x9bK\xb0x\xb8\x90XU?Da]qelementIdentifierjissue_datelelementValue\xd9\x03\xecj2019-10-20
 
 # here the MSO of the first document
 ia = do['documents'][0]['issuerSigned']['issuerAuth']
@@ -127,13 +145,14 @@ from pycose.messages import Sign1Message
 
 # TAG 18 identifies the COSE_Sign1 objects
 
-TAG18 = b'\xd2'
-decoded = Sign1Message.decode(TAG18 + b'\x84C\xa1\x01&' + BIN_ISSUED_MDOC.split(b'\x84C\xa1\x01&')[1].split(b'ldeviceSigned')[0])
+# TAG18 = b'\xd2'
+# decoded = Sign1Message.decode(TAG18 + b'\x84C\xa1\x01&' + BIN_ISSUED_MDOC.split(b'\x84C\xa1\x01&')[1].split(b'ldeviceSigned')[0])
 
 # OR BETTER
 decoded = Sign1Message.decode(cbor2.dumps(cbor2.CBORTag(18, value=ia)))
 decoded.key = key
 decoded.verify_signature()
+
 
 
 mso = Sign1Message(
