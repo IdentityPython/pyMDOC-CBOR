@@ -26,7 +26,7 @@ Where a single `$doc` it something like as follow.
                 ...
             ]
     'issuerAuth': ->  Contains the mobile security object (MSO) for issuer data authentication, an Array of the elements below
-        cbor({1: -7}) # Protected Header
+        cbor({1: -7}) # Protected Header, find -7 here https://datatracker.ietf.org/doc/html/rfc8152 -> ES256 SHA-256
         {33: cbor tag( -17)} # Unprotected header -> the x5chain element has the temporary identifer 33 registered in the IANA registry.
         Tag(24, cbor(payload) -> It's a MobileSecurityObjectBytes
             {
@@ -211,8 +211,8 @@ In the example below the certificate is invalid since it is expired
 import binascii 
 import cbor2
 
-from pycose.keys import CoseKey
-from pycose.messages.sign1message import Sign1Message
+from pycose.keys import EC2Key, CoseKey
+from pycose.messages import Sign1Message
 
 
 BIN_ISSUED_MDOC = binascii.unhexlify(ISSUED_MDOC)
@@ -236,8 +236,6 @@ do['documents']
 ia = do['documents'][0]['issuerSigned']['issuerAuth']
 
 key = CoseKey.from_dict(cbor2.loads(cbor2.loads(ia[2]).value)['deviceKeyInfo']['deviceKey'])
-
-from pycose.messages import Sign1Message
 
 # TAG 18 identifies the COSE_Sign1 objects
 
@@ -276,6 +274,7 @@ _key = der_certificates.public_key()
 COSEKEY_HAZMAT_CRV_MAP = {
     "secp256r1": "P_256"
 }
+
 
 # since _key.curve.name == secp256r1
 key = EC2Key(crv=COSEKEY_HAZMAT_CRV_MAP[_key.curve.name], x=_key.public_numbers().x.to_bytes(32, 'big'))

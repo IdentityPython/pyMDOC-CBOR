@@ -7,7 +7,7 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
-_pkg_name = 'pymdocmso'
+_pkg_name = 'pymdoccbor'
 
 with open(f'{_pkg_name}/__init__.py', 'r') as fd:
     VERSION = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
@@ -16,7 +16,7 @@ with open(f'{_pkg_name}/__init__.py', 'r') as fd:
 setup(
     name=_pkg_name,
     version=VERSION,
-    description="Python reader/writer for Mobile Driving License and eIDAS MDOC and MSO.",
+    description="Python parser and writer for Mobile Driving License and EUDI Wallet MDOC CBOR.",
     long_description=readme(),
     long_description_content_type='text/markdown',
     classifiers=[
@@ -42,6 +42,8 @@ setup(
         ]
     },
     install_requires=[
-        'cbor2'
+        'cbor2',
+        'cwt',
+        'pycose'
     ],
 )
