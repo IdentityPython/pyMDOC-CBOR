@@ -71,7 +71,15 @@ print(cbor2diag(encoded))
 
 Other examples at [cbor official documentation](https://github.com/agronholm/cbor2).
 
-## Utilities
+## References
+
+### Docs
+
+#### X.509 certificates and chains
+
+- [Python Certvalidator](https://github.com/wbond/certvalidator/blob/master/docs/usage.md)
+
+### Utilities
 
 - [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py/tree/main/python/cbor_diag)-
 
