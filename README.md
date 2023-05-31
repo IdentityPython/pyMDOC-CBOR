@@ -65,7 +65,7 @@ API usage:
  - `msop.object`: returns a pycose COSE_Sign1 object.
  - `msop.raw_public_keys`: returns the list of the public keys from the unprotected COSE header
  - `msop.public_key`: returns `cryptography.hazmat` key.
- - `msop.x509_certificates`: returns a list of `cryptography.x509` Certificate objects
+ - `msop.x509_certificates`: returns a list of `cryptography.x509` certificate objects
 
 ## Quick examples
 
