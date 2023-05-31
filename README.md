@@ -72,12 +72,12 @@ echo $ISSUED_MDOC | xxd -r -ps | python3 -m cbor2.tool --pretty
 
 ### using cbor-diag
 
-#### install cbor-diag
+Install cbor-diag
 ````
 pip install cbor-diag
 ````
 
-#### print a cbor diagnostic representation
+Print a cbor diagnostic representation
 ````
 from cbor_diag import *
 
@@ -91,7 +91,7 @@ Other examples at [cbor official documentation](https://github.com/agronholm/cbo
 
 #### CBOR Diagnostic representation
 
-- [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py/tree/main/python/cbor_diag)-
+- [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py)
 
 #### X.509 certificates and chains
 
