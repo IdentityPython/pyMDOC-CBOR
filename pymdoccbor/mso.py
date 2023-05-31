@@ -49,7 +49,9 @@ class MsoParser(MobileSecurityObject):
         
         self.object :Sign1Message = bytes2CoseSign1(self._data)
         self.object.key :Optional[CoseKey, None]  = None
-
+        self.public_key :cryptography.hazmat.backends.openssl.ec._EllipticCurvePublicKey = None
+        self.x509_certificates :list  = []
+        
     @property
     def payload_as_cbor(self):
         """
@@ -79,16 +81,17 @@ class MsoParser(MobileSecurityObject):
             "doesn't validate x.509 certificate chain. See next releases and "
             "python certvalidator or cryptography for that"
         )
-        der_certificate = cryptography.x509.load_der_x509_certificate(
-            self.raw_public_keys[0]
-        )
+        for i in self.raw_public_keys:
+            self.x509_certificates.append(
+                cryptography.x509.load_der_x509_certificate(i)
+            )
         
-        _key = der_certificate.public_key()
+        self.public_key = self.x509_certificates[0].public_key()
         
         key = EC2Key(
-            crv=COSEKEY_HAZMAT_CRV_MAP[_key.curve.name], 
-            x=_key.public_numbers().x.to_bytes(
-                CRV_LEN_MAP[_key.curve.name], 'big'
+            crv=COSEKEY_HAZMAT_CRV_MAP[self.public_key.curve.name], 
+            x=self.public_key.public_numbers().x.to_bytes(
+                CRV_LEN_MAP[self.public_key.curve.name], 'big'
             )
         )
         self.object.key = key

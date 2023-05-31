@@ -56,8 +56,16 @@ BIN_ISSUED_MDOC = binascii.unhexlify(ISSUED_MDOC)
 mdoc = cbor2.loads(BIN_ISSUED_MDOC)
 msop = MsoParser(mdoc['documents'][0]['issuerSigned']['issuerAuth'])
 msop.verify_signature()
-
 ````
+
+API usage:
+ - `msop.payload_as_dict`: returns the MSO as Python dictionary.
+ - `msop.payload_as_raw`: returns the MSO as bytes in its original format.
+ - `msop.payload_as_cbor`: returns the MSO as CBOR encoded object.
+ - `msop.object`: returns a pycose COSE_Sign1 object.
+ - `msop.raw_public_keys`: returns the list of the public keys from the unprotected COSE header
+ - `msop.public_key`: returns `cryptography.hazmat` key.
+ - `msop.x509_certificates`: returns a list of `cryptography.x509` Certificate objects
 
 ## Quick examples
 
