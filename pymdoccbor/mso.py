@@ -95,14 +95,14 @@ class MsoParser(MobileSecurityObject):
             )
         )
         self.object.key = key
-        
+
     def verify_signature(self) -> bool:
-        
+
         if not self.object.key:
             self.load_public_key()
         
         return self.object.verify_signature()
-    
+
 
 class MsoWriter(MobileSecurityObject):
     """

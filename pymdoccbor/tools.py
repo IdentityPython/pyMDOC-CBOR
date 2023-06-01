@@ -10,7 +10,7 @@ def bytes2CoseSign1(data :bytes) -> Sign1Message:
     """
     decoded = Sign1Message.decode(
         cbor2.dumps(
-            cbor2.CBORTag(18, value=data)
+            cbor2.CBORTag(24, value=data)
         )
     )
     
