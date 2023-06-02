@@ -11,7 +11,7 @@ Python parser and writer for eIDAS MDOC CBOR.
 - [RFC 8152 - CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc8152)
 - [IANA Registry - Concise Binary Object Representation (CBOR) Tags](https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml)
 
-Tag 33 in MSO:
+COSE label 33 (x5chain) in MSO:
 
 - [RFC 9360 CBOR Object Signing and Encryption (COSE) - Header Parameters for Carrying and Referencing X.509 Certificates](https://www.rfc-editor.org/rfc/rfc9360.html)
 
