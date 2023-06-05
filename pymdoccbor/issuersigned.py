@@ -1,4 +1,7 @@
-from . import MdocIssuerAuth as IssuerAuth
+import cbor2
+from typing import Union
+
+from . mso import MsoParser
 
 
 class IssuerSigned:
@@ -15,7 +18,25 @@ class IssuerSigned:
         bytes # Signature
     ]
     """
-    nameSpaces :dict = {}
-    issuerAuth :IssuerAuth = None
+    #  nameSpaces :dict = {}
+    #  issuerAuth :IssuerAuth = None
     
+    def __init__(self, nameSpaces :dict, issuerAuth :Union[dict, bytes]):
+        self.namespaces :dict = nameSpaces
+        
+        #  if isinstance(ia, dict):
+        self.issuer_auth = MsoParser(issuerAuth)
     
+    def dump(self):
+        return {
+            'nameSpaces': self.namespaces,
+            'issuerAuth': self.issuer_auth
+        }
+    
+    def dumps(self):
+        return cbor2.dumps(
+            {
+            'nameSpaces': self.namespaces,
+            'issuerAuth': self.issuer_auth.payload_as_cbor
+            }
+        )

@@ -40,7 +40,20 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 
 ### Issue a mDOC
 
-TODO
+
+### Parse a binary Mdoc 
+
+````
+from pymdoccbor.mdoc import MdocCbor
+import os
+ISSUED_MDOC = os.getenv("ISSUED_MDOC")
+mdoc = MdocCbor()
+mdoc.loads(ISSUED_MDOC)
+mdoc.verify()
+
+mdoc.documents
+>> [MobileDocument [valid]]
+````
 
 ### Verify the Mobile Security Object
 

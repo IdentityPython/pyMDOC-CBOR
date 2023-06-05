@@ -8,8 +8,9 @@ from pycose.messages import Sign1Message
 
 from typing import Optional, Union
 
+from . exceptions import UnsupportedMsoDataFormat
 from . settings import COSEKEY_HAZMAT_CRV_MAP, CRV_LEN_MAP
-from . tools import bytes2CoseSign1
+from . tools import bytes2CoseSign1, cborlist2CoseSign1
 
 
 logger = logging.getLogger("mso")
@@ -24,8 +25,8 @@ class MobileSecurityObject:
     """
 
     pass
-    
-    
+
+
 class MsoParser(MobileSecurityObject):
     """
     Parameters
@@ -42,7 +43,16 @@ class MsoParser(MobileSecurityObject):
     def __init__(self, data: cbor2.CBORTag):
         self._data = data
         
-        self.object :Sign1Message = bytes2CoseSign1(self._data)
+        if isinstance(data, bytes):
+            self.object :Sign1Message = bytes2CoseSign1(cbor2.dumps(cbor2.CBORTag(18, value=data)))
+        elif isinstance(data, list):
+            self.object :Sign1Message = cborlist2CoseSign1(self._data)
+        else:
+            raise UnsupportedMsoDataFormat(
+                f"MsoParser only supports raw bytes and list, a {type(data)} was provided"
+            )
+        
+        
         self.object.key :Optional[CoseKey, None]  = None
         self.public_key :cryptography.hazmat.backends.openssl.ec._EllipticCurvePublicKey = None
         self.x509_certificates :list  = []
