@@ -1,8 +1,11 @@
-from . import IssuerAuth
+from . import MdocIssuerAuth as IssuerAuth
 
 
 class IssuerSigned:
     """
+    nameSpaces provides the definition within which the data elements of 
+        the document are defined.  A document may have multiple nameSpaces.
+    
     IssuerAuth is a COSE_Sign1 ; The payload is the MobileSecurityObject, see ISO 18013-5 section 9.2.2.4 
     
     issuerAuth is a list of [
@@ -14,3 +17,5 @@ class IssuerSigned:
     """
     nameSpaces :dict = {}
     issuerAuth :IssuerAuth = None
+    
+    

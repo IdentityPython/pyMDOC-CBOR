@@ -2,7 +2,10 @@ from typing import List
 
 from pycose.messages.sign1message import Sign1Message
 
-class IssuerAuth:
+from . mso import MsoWriter, MsoParser
+
+
+class MdocIssuerAuth:
     """
     IssuerAuth is a COSE_Sign1 ; The payload is the MobileSecurityObject, see ISO 18013-5 section 9.2.2.4 
     

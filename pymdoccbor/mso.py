@@ -7,15 +7,10 @@ from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
 
 from typing import Optional, Union
+
+from . settings import COSEKEY_HAZMAT_CRV_MAP, CRV_LEN_MAP
 from . tools import bytes2CoseSign1
 
-
-COSEKEY_HAZMAT_CRV_MAP = {
-    "secp256r1": "P_256"
-}
-CRV_LEN_MAP = {
-    "secp256r1": 32,
-}
 
 logger = logging.getLogger("mso")
 
