@@ -46,7 +46,7 @@ def test_parse_mdoc_break():
     mdoc_break.loads(_breaked_mso)
     
     assert mdoc_break.verify() == False
-    assert mdoc_break.documents[0].is_valid == False
+    assert mdoc_break.documents_invalid[0].is_valid == False
 
 
 def test_pretty_print():

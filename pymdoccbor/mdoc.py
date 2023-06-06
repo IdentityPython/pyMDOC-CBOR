@@ -98,7 +98,11 @@ class MdocCbor:
             mso = MobileDocument(**doc)
 
             try:
-                mso.verify()
+                if mso.verify():
+                    self.documents.append(mso)
+                else:
+                    self.documents_invalid.append(mso)
+                
             except Exception as e:
                 logger.error(
                     f"COSE Sign1 validation failed to the document number #{doc_cnt}. "
@@ -107,11 +111,10 @@ class MdocCbor:
                 self.documents_invalid.append(doc)
                 doc_cnt += 1
                 continue
-
-            self.documents.append(mso)
+            
             doc_cnt += 1
         
-        return True if self.documents_invalid else False
+        return False if self.documents_invalid else True
         
     def __repr__(self):
         return (
