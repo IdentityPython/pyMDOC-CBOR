@@ -33,9 +33,9 @@ class MobileDocument:
     def dumps(self) -> dict:
         return cbor2.dumps(
             cbor2.CBORTag(24, value={
-                'docType': self.doctype,
-                'issuerSigned': self.issuersigned.dumps()
-            }
+                    'docType': self.doctype,
+                    'issuerSigned': self.issuersigned.dumps()
+                }
             )
         )
 
@@ -110,3 +110,11 @@ class MdocCbor:
 
             self.documents.append(mso)
             doc_cnt += 1
+        
+        return True if self.documents_invalid else False
+        
+    def __repr__(self):
+        return (
+            f"{self.__module__}.{self.__class__.__name__} "
+            f"[{len(self.documents)} documents]"
+        )

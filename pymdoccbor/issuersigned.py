@@ -18,8 +18,6 @@ class IssuerSigned:
         bytes # Signature
     ]
     """
-    #  nameSpaces :dict = {}
-    #  issuerAuth :IssuerAuth = None
 
     def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]):
         self.namespaces: dict = nameSpaces

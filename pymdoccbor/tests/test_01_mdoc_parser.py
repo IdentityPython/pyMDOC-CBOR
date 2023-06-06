@@ -31,6 +31,22 @@ def test_parse_mdoc_af_binary():
         assert i.is_valid
 
     assert len(mdoc.documents) == 1
+    
+    # test repr
+    mdoc
+
+
+def test_parse_mdoc_break():
+    
+    signature_bytes       = "cff12c17d4739aba806035a9cb2b34ae8a830cef4f329289f9a3ebd302dd6b99c584068257569397b92ba9aa5128554eb05d1273dafea313da4aff6b01a5fb3f"
+    fault_signature_bytes = "aff12c17d4739aba806035a9eb2b34aefa830cef4f329289e9a3ebd302dd6b99f584068257569397b92ca9aa5128554eb05d2273dafea313da4aff6b01a5fb3e"
+    _breaked_mso = ISSUED_MDOC.replace(signature_bytes, fault_signature_bytes)
+    
+    mdoc_break = MdocCbor()
+    mdoc_break.loads(_breaked_mso)
+    
+    assert mdoc_break.verify() == False
+    assert mdoc_break.documents[0].is_valid == False
 
 
 def test_pretty_print():
