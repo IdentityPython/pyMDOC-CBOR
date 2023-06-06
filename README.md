@@ -90,6 +90,13 @@ export ISSUED_MDOC="a36776657273696f6e63312e3069646f63756d656e747381a367646f6354
 echo $ISSUED_MDOC | xxd -r -ps | python3 -m cbor2.tool --pretty
 ````
 
+## Tests
+
+````
+coverage erase
+pytest --cov-report term-missing --cov-report term:skip-covered --cov
+````
+
 ### using cbor-diag
 
 Install cbor-diag
