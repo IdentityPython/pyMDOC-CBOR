@@ -12,9 +12,10 @@ def bytes2CoseSign1(data :bytes) -> Sign1Message:
     
     return decoded
 
-def cborlist2CoseSign1(data :bytes) -> Sign1Message:
+
+def cborlist2CoseSign1(data :list) -> Sign1Message:
     """ 
-        Gets bytes and return a COSE_Sign1 object
+        Gets cbor2 decoded COSE Sign1 as a list and return a COSE_Sign1 object
     """
     decoded = Sign1Message.decode(
         cbor2.dumps(

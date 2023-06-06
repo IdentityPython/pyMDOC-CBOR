@@ -1,0 +1,7 @@
+pytest
+pdbpp
+pytest-cov
+flake8
+isort
+autoflake
+bandit

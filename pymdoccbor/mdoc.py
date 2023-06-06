@@ -81,7 +81,7 @@ class MdocCbor:
 
     @property
     def data_as_string(self):
-        return self.dumps()
+        return self.dumps().decode()
 
     def verify(self):
         

@@ -14,3 +14,19 @@ def test_parse_mdoc_af_binary():
     for i in mdoc.documents:
         assert i.is_valid
     
+    assert len(mdoc.documents) == 1
+    
+    # testing format outputs
+    assert type(mdoc.data_as_string) == str
+    assert type(mdoc.data_as_bytes) == bytes
+    assert type(mdoc.data_as_cbor_dict) == dict
+    
+    # testing from export re-import
+    mdoc2 = MdocCbor()
+    mdoc2.loads(mdoc.data_as_bytes)
+    mdoc2.verify()
+
+    for i in mdoc.documents:
+        assert i.is_valid
+    
+    assert len(mdoc.documents) == 1
