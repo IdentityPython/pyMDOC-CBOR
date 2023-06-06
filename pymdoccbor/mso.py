@@ -9,10 +9,10 @@ from typing import Optional
 
 from . exceptions import UnsupportedMsoDataFormat
 from . settings import COSEKEY_HAZMAT_CRV_MAP, CRV_LEN_MAP
-from . tools import bytes2CoseSign1, cborlist2CoseSign1
+from . tools import cborlist2CoseSign1
 
 
-logger = logging.getLogger("mso")
+logger = logging.getLogger("pymdoccbor")
 
 
 class MobileSecurityObject:
@@ -39,11 +39,14 @@ class MsoParser(MobileSecurityObject):
 
     def __init__(self, data: cbor2.CBORTag):
         self._data = data
-
-        if isinstance(data, bytes):
-            self.object: Sign1Message = bytes2CoseSign1(
-                cbor2.dumps(cbor2.CBORTag(18, value=data)))
-        elif isinstance(data, list):
+        
+        # not used
+        #  if isinstance(data, bytes):
+            #  self.object: Sign1Message = bytes2CoseSign1(
+                #  cbor2.dumps(cbor2.CBORTag(18, value=data)))
+        #  el
+        
+        if isinstance(data, list):
             self.object: Sign1Message = cborlist2CoseSign1(self._data)
         else:
             raise UnsupportedMsoDataFormat(
@@ -74,15 +77,19 @@ class MsoParser(MobileSecurityObject):
     @property
     def raw_public_keys(self) -> bytes:
         return list(self.object.uhdr.values())
-
-    def load_public_key(self):
-
+    
+    def attest_public_key(self):
         logger.warning(
             "TODO: in next releases. "
             "The certificate is to be considered as untrusted, this release "
             "doesn't validate x.509 certificate chain. See next releases and "
             "python certvalidator or cryptography for that"
         )
+    
+    def load_public_key(self):
+        
+        self.attest_public_key()
+
         for i in self.raw_public_keys:
             self.x509_certificates.append(
                 cryptography.x509.load_der_x509_certificate(i)

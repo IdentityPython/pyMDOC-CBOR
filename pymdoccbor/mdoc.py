@@ -109,8 +109,6 @@ class MdocCbor:
                     f"Then it is appended to self.documents_invalid: {e}"
                 )
                 self.documents_invalid.append(doc)
-                doc_cnt += 1
-                continue
             
             doc_cnt += 1
         
@@ -119,5 +117,5 @@ class MdocCbor:
     def __repr__(self):
         return (
             f"{self.__module__}.{self.__class__.__name__} "
-            f"[{len(self.documents)} documents]"
+            f"[{len(self.documents)} valid documents]"
         )

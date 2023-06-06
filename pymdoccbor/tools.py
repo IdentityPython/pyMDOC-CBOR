@@ -9,13 +9,14 @@ from cbor2.tool import (
 from pycose.messages import Sign1Message    
 
 
-def bytes2CoseSign1(data: bytes) -> Sign1Message:
-    """ 
-        Gets bytes and return a COSE_Sign1 object
-    """
-    decoded = Sign1Message.decode(data)
+# not used.
+#  def bytes2CoseSign1(data: bytes) -> Sign1Message:
+    #  """ 
+        #  Gets bytes and return a COSE_Sign1 object
+    #  """
+    #  decoded = Sign1Message.decode(data)
 
-    return decoded
+    #  return decoded
 
 
 def cborlist2CoseSign1(data: list) -> Sign1Message:

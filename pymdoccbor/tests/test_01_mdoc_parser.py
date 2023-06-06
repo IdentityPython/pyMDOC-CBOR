@@ -33,7 +33,7 @@ def test_parse_mdoc_af_binary():
     assert len(mdoc.documents) == 1
     
     # test repr
-    mdoc
+    mdoc.__repr__()
 
 
 def test_parse_mdoc_break():
