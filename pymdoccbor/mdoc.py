@@ -2,7 +2,8 @@ import binascii
 import cbor2
 import logging
 
-from typing import List
+from pycose.keys import CoseKey
+from typing import List, Union
 
 from . exceptions import InvalidMdoc
 from . issuersigned import IssuerSigned
@@ -53,13 +54,16 @@ class MdocCbor:
     documents: List[MobileDocument] = []
     status: int = 0
 
-    def __init__(self):
+    def __init__(self, private_key :Union[dict, CoseKey] = {} ):
         self.data_as_bytes: bytes = b""
         self.data_as_cbor_dict: dict = {}
 
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
-
+        
+        if private_key and isinstance(private_key, dict):
+            self.private_key = CoseKey.from_dict(private_key)
+        
     def loads(self, data: str):
         """
         data is a AF BINARY 
@@ -70,6 +74,19 @@ class MdocCbor:
         self.data_as_bytes = binascii.unhexlify(data)
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
 
+    # TODO
+    #  def new(self, data :dict, dkeyinfo :Union[dict, CoseKey]):
+        #  """
+            #  create a new mdoc with signed mso
+            
+            #  data has this structure:
+                #  {
+                    #  namespace: { k:v}
+                #  }
+        #  """
+        #  if isinstance(dkeyinfo, dict):
+            #  dkeyinfo = CoseKey.from_dict(self.private_key)
+        
     def dump(self) -> bytes:
         return self.data_as_bytes
 

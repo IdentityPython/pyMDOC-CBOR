@@ -8,7 +8,8 @@ Python parser and writer for eIDAS MDOC CBOR.
 
 - [ISO 18013-5 - ISO-compliant driving licence — Mobile driving licence (mDL) application](https://www.iso.org/standard/69084.html)
 - [RFC 8949 - Concise Binary Object Representation (CBOR)](https://datatracker.ietf.org/doc/html/rfc8949)
-- [RFC 8152 - CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc8152)
+- [RFC 9052 - CBOR Object Signing and Encryption (COSE): Structures and Process](https://www.rfc-editor.org/rfc/rfc9052.html)
+    - deprecates [RFC 8152 - CBOR Object Signing and Encryption (COSE)](https://datatracker.ietf.org/doc/html/rfc8152)
 - [IANA Registry - Concise Binary Object Representation (CBOR) Tags](https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml)
 
 COSE label 33 (x5chain) in MSO:
@@ -38,8 +39,40 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 
 ## Usage
 
-### Issue a mDOC
+### Issue an MSO
 
+
+````
+import os
+from pymdoccbor.mso import MsoIssuer
+
+msow = MsoIssuer(
+    data = {
+        "eu.europa.ec.eudiw.pid.1": {
+            "family_name": "Raffaello",
+            "given_name": "Mascetti",
+            "birth_date": "1922-03-13"
+        }
+    },
+    private_key = {
+        'KTY': 'EC2',
+        'CURVE': 'P_256',
+        'ALG': 'ES256',
+        'D': os.urandom(32),
+        'KID': b"demo-kid"
+    }
+)
+
+mso = msow.sign()
+````
+
+API usage:
+ - `msow.data`, user attributes to be encoded
+ - `msow.private_key`, COSEKey
+ - `msow.public_key`, COSEKey without `d` (for EC2Key)
+ - `msow.selfsigned_x509cert`, using the private and the public keys returns a self-signed x509 certificate
+ - `msow.hash_map`, digests that will be signed in the MSO
+ - `msow.disclosure_map`, disclosure objects grouped by namespaces
 
 ### Parse a binary Mdoc 
 

@@ -25,7 +25,7 @@ Where a single `$doc` it something like as follow.
                 ), -> {'digestID': 0, 'random': b'\x87\x98d[ \xea \x0e\x19\xff\xab\xac\x92bK\xeej\xecc\xac\xee\xde\xcf\xb1\xb8\x00w\xd2+\xfc \xe9', 'elementIdentifier': 'family_name', 'elementValue': 'Doe'}
                 ...
             ]
-    'issuerAuth': ->  Contains the mobile security object (MSO) for issuer data authentication, an Array of the elements below
+    'issuerAuth': ->  TAG 18 Contains the mobile security object (MSO) for issuer data authentication, an Array of the elements below
         cbor({1: -7}) # Protected Header, find -7 here https://datatracker.ietf.org/doc/html/rfc8152 -> ES256 SHA-256
         {33: cbor tag( -17)} # Unprotected header -> the x5chain element has the temporary identifer 33 registered in the IANA registry.
         Tag(24, cbor(payload) -> It's a MobileSecurityObjectBytes

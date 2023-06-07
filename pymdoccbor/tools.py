@@ -1,5 +1,6 @@
 import cbor2
 import json
+import random
 
 
 from cbor2.tool import (
@@ -40,3 +41,14 @@ def pretty_print(cbor_loaded: dict):
         cls=DefaultEncoder
     )
     print(res)
+
+
+def shuffle_dict(d : dict):
+
+    keys =  list(d.keys())
+    
+    for i in range(random.randint(3, 27)):
+        random.shuffle(keys)
+    
+    return dict([(key, d[key]) for key in keys])
+    
