@@ -47,7 +47,7 @@ def shuffle_dict(d: dict):
 
     keys = list(d.keys())
 
-    for i in range(random.randint(3, 27)):
+    for i in range(random.randint(3, 27)):  # nosec: B311
         random.shuffle(keys)
 
     return dict([(key, d[key]) for key in keys])
