@@ -37,7 +37,12 @@ class MsoX509Fabric:
             datetime.datetime.utcnow() + datetime.timedelta(days=10)
         ).add_extension(
             x509.SubjectAlternativeName(
-                [x509.DNSName(u"localhost")]),  # please don't!
+                [
+                    x509.UniformResourceIdentifier(
+                        u"https://credential-issuer.oidc-federation.online"
+                    )
+                ]
+            ),
             critical=False,
             # Sign our certificate with our private key
         ).sign(ckey.key, hashes.SHA256())
@@ -45,7 +50,9 @@ class MsoX509Fabric:
         if not encoding:
             return cert
         else:
-            return cert.public_bytes(getattr(serialization.Encoding, encoding))
+            return cert.public_bytes(
+                getattr(serialization.Encoding, encoding)
+            )
 
     def trials(self):
         # here some desperated trials to have a publick raw key usable in phdr or uhdr

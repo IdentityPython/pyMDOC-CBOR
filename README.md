@@ -43,8 +43,10 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 
 MsoIssuer is a class that handles private keys, data processing, digests and signature operations.
 
-The `disclosure_map` is then used in the Mdoc `nameSpaces` object for issuance and presentations,
-then it's outside the MSO.
+The `disclosure_map` is used in the Mdoc `nameSpaces` object for issuance and presentations,
+it's carried in the mdoc but outside the MSO, even if it is produced by `MsoIssuer`.
+that's why `MsoIssuer.sign()` returns a pure MSO, while `disclosure_map` 
+is an attribute of the `MsoIssuer` instance.
 
 ````
 import os
