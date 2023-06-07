@@ -41,6 +41,10 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 
 ### Issue an MSO
 
+MsoIssuer is a class that handles private keys, data processing, digests and signature operations.
+
+The `disclosure_map` is then used in the Mdoc `nameSpaces` object for issuance and presentations,
+then it's outside the MSO.
 
 ````
 import os
@@ -73,6 +77,7 @@ API usage:
  - `msow.selfsigned_x509cert`, using the private and the public keys returns a self-signed x509 certificate
  - `msow.hash_map`, digests that will be signed in the MSO
  - `msow.disclosure_map`, disclosure objects grouped by namespaces
+ - `msow.sign`, signs the MSO and returns it
 
 ### Parse a binary Mdoc 
 
