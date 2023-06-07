@@ -4,20 +4,20 @@ import random
 
 
 from cbor2.tool import (
-    DefaultEncoder, 
+    DefaultEncoder,
     key_to_str
 )
-from pycose.messages import Sign1Message    
+from pycose.messages import Sign1Message
 
 
 # not used.
 #  def bytes2CoseSign1(data: bytes) -> Sign1Message:
-    #  """ 
-        #  Gets bytes and return a COSE_Sign1 object
-    #  """
-    #  decoded = Sign1Message.decode(data)
+#  """
+#  Gets bytes and return a COSE_Sign1 object
+#  """
+#  decoded = Sign1Message.decode(data)
 
-    #  return decoded
+#  return decoded
 
 
 def cborlist2CoseSign1(data: list) -> Sign1Message:
@@ -43,12 +43,11 @@ def pretty_print(cbor_loaded: dict):
     print(res)
 
 
-def shuffle_dict(d : dict):
+def shuffle_dict(d: dict):
 
-    keys =  list(d.keys())
-    
+    keys = list(d.keys())
+
     for i in range(random.randint(3, 27)):
         random.shuffle(keys)
-    
+
     return dict([(key, d[key]) for key in keys])
-    

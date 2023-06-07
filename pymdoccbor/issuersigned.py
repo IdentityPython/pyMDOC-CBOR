@@ -20,7 +20,7 @@ class IssuerSigned:
     """
 
     def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]):
-        self.namespaces :dict = nameSpaces
+        self.namespaces: dict = nameSpaces
 
         #  if isinstance(ia, dict):
         self.issuer_auth = MsoParser(issuerAuth)

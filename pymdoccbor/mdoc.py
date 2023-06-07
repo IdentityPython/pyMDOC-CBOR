@@ -34,9 +34,9 @@ class MobileDocument:
     def dumps(self) -> dict:
         return cbor2.dumps(
             cbor2.CBORTag(24, value={
-                    'docType': self.doctype,
-                    'issuerSigned': self.issuersigned.dumps()
-                }
+                'docType': self.doctype,
+                'issuerSigned': self.issuersigned.dumps()
+            }
             )
         )
 
@@ -54,16 +54,16 @@ class MdocCbor:
     documents: List[MobileDocument] = []
     status: int = 0
 
-    def __init__(self, private_key :Union[dict, CoseKey] = {} ):
+    def __init__(self, private_key: Union[dict, CoseKey] = {}):
         self.data_as_bytes: bytes = b""
         self.data_as_cbor_dict: dict = {}
 
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
-        
+
         if private_key and isinstance(private_key, dict):
             self.private_key = CoseKey.from_dict(private_key)
-        
+
     def loads(self, data: str):
         """
         data is a AF BINARY 
@@ -77,16 +77,16 @@ class MdocCbor:
     # TODO
     #  def new(self, data :dict, dkeyinfo :Union[dict, CoseKey]):
         #  """
-            #  create a new mdoc with signed mso
-            
-            #  data has this structure:
-                #  {
-                    #  namespace: { k:v}
-                #  }
+        #  create a new mdoc with signed mso
+
+        #  data has this structure:
+        #  {
+        #  namespace: { k:v}
+        #  }
         #  """
         #  if isinstance(dkeyinfo, dict):
-            #  dkeyinfo = CoseKey.from_dict(self.private_key)
-        
+        #  dkeyinfo = CoseKey.from_dict(self.private_key)
+
     def dump(self) -> bytes:
         return self.data_as_bytes
 
@@ -119,18 +119,18 @@ class MdocCbor:
                     self.documents.append(mso)
                 else:
                     self.documents_invalid.append(mso)
-                
+
             except Exception as e:
                 logger.error(
                     f"COSE Sign1 validation failed to the document number #{doc_cnt}. "
                     f"Then it is appended to self.documents_invalid: {e}"
                 )
                 self.documents_invalid.append(doc)
-            
+
             doc_cnt += 1
-        
+
         return False if self.documents_invalid else True
-        
+
     def __repr__(self):
         return (
             f"{self.__module__}.{self.__class__.__name__} "

@@ -1,6 +1,4 @@
-import cbor2
 import os
-import sys
 
 from pycose.messages import Sign1Message
 
@@ -19,15 +17,15 @@ PKEY = key_attribute_dict = {
 
 def test_mso_writer():
     msow = MsoIssuer(
-        data = PID_DATA,
-        private_key = PKEY
+        data=PID_DATA,
+        private_key=PKEY
     )
-    
+
     # TODO: assertion here about msow.hash_map and msow.disclosure_map
-    
+
     mso = msow.sign()
-    
-    decoded = Sign1Message.decode(mso.encode())
-    
+
+    Sign1Message.decode(mso.encode())
+
     # TODO: assertion about the content
     # breakpoint()

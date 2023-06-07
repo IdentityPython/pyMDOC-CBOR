@@ -31,9 +31,6 @@ PID_DATA = {
         "document_number": "CA0568IT_example",
         "administrative_number": None,
         "issuing_country": "IT",
-        "issuing_jurisdiction": None 
+        "issuing_jurisdiction": None
     }
 }
-
-
-

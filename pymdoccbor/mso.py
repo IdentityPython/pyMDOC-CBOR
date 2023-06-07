@@ -2,7 +2,6 @@ import cbor2
 import cryptography
 import datetime
 import hashlib
-import json
 import logging
 import secrets
 import uuid
@@ -11,9 +10,9 @@ from pycose.headers import Algorithm, KID
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
 
-from typing import List, Optional, Union
+from typing import Optional, Union
 
-from . exceptions import UnsupportedMsoDataFormat
+from . exceptions import MsoPrivateKeyRequired, UnsupportedMsoDataFormat
 from . x509 import MsoX509Fabric
 from . settings import COSEKEY_HAZMAT_CRV_MAP, CRV_LEN_MAP
 from . tools import cborlist2CoseSign1, shuffle_dict
@@ -47,13 +46,13 @@ class MsoParser(MobileSecurityObject):
 
     def __init__(self, data: cbor2.CBORTag):
         self._data = data
-        
+
         # not used
         #  if isinstance(data, bytes):
-            #  self.object: Sign1Message = bytes2CoseSign1(
-                #  cbor2.dumps(cbor2.CBORTag(18, value=data)))
+        #  self.object: Sign1Message = bytes2CoseSign1(
+        #  cbor2.dumps(cbor2.CBORTag(18, value=data)))
         #  el
-        
+
         if isinstance(data, list):
             self.object: Sign1Message = cborlist2CoseSign1(self._data)
         else:
@@ -85,7 +84,7 @@ class MsoParser(MobileSecurityObject):
     @property
     def raw_public_keys(self) -> bytes:
         return list(self.object.uhdr.values())
-    
+
     def attest_public_key(self):
         logger.warning(
             "TODO: in next releases. "
@@ -93,9 +92,9 @@ class MsoParser(MobileSecurityObject):
             "doesn't validate x.509 certificate chain. See next releases and "
             "python certvalidator or cryptography for that"
         )
-    
+
     def load_public_key(self):
-        
+
         self.attest_public_key()
 
         for i in self.raw_public_keys:
@@ -125,13 +124,14 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
     """
 
     """
+
     def __init__(
-        self, 
-        data :dict, 
-        private_key :Union[dict, CoseKey], 
-        digest_alg :str = settings.PYMDOC_HASHALG
+        self,
+        data: dict,
+        private_key: Union[dict, CoseKey],
+        digest_alg: str = settings.PYMDOC_HASHALG
     ):
-        
+
         if private_key and isinstance(private_key, dict):
             self.private_key = CoseKey.from_dict(private_key)
             if not self.private_key.kid:
@@ -142,57 +142,57 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
             )
 
         self.public_key = EC2Key(
-            crv=self.private_key.crv, 
-            x=self.private_key.x, 
+            crv=self.private_key.crv,
+            x=self.private_key.x,
             y=self.private_key.y
         )
 
-        self.data :dict = data
-        self.hash_map :dict = {}
-        self.disclosure_map :dict = {}
-        self.digest_alg :str = digest_alg
-        
+        self.data: dict = data
+        self.hash_map: dict = {}
+        self.disclosure_map: dict = {}
+        self.digest_alg: str = digest_alg
+
         hashfunc = getattr(
-            hashlib, 
+            hashlib,
             settings.HASHALG_MAP[settings.PYMDOC_HASHALG]
         )
-        
+
         digest_cnt = 0
         for ns, values in data.items():
             self.disclosure_map[ns] = {}
             self.hash_map[ns] = {}
             for k, v in shuffle_dict(values).items():
-                
+
                 _rnd_salt = secrets.token_bytes(settings.DIGEST_SALT_LENGTH)
 
                 self.disclosure_map[ns][digest_cnt] = {
-                    'digestID': digest_cnt, 
-                    'random': _rnd_salt, 
-                    'elementIdentifier': 'family_name', 
+                    'digestID': digest_cnt,
+                    'random': _rnd_salt,
+                    'elementIdentifier': 'family_name',
                     'elementValue': 'Doe'
                 }
-                
+
                 self.hash_map[ns][digest_cnt] = hashfunc(
                     cbor2.dumps(
                         cbor2.CBORTag(
-                          24, 
-                          value=cbor2.dumps(
-                            self.disclosure_map[ns][digest_cnt]
-                          )
+                            24,
+                            value=cbor2.dumps(
+                                self.disclosure_map[ns][digest_cnt]
+                            )
                         )
-                      )
-                    ).digest()
+                    )
+                ).digest()
 
                 digest_cnt += 1
-    
-    def format_datetime_repr(self, dt :datetime.datetime):
-        return dt.isoformat().split('.')[0]+ 'Z'
-    
+
+    def format_datetime_repr(self, dt: datetime.datetime):
+        return dt.isoformat().split('.')[0] + 'Z'
+
     def sign(
         self,
-        device_key :Union[dict, None] = None,
-        valid_from :Union[None, datetime.datetime] = None,
-        doctype :str = None
+        device_key: Union[dict, None] = None,
+        valid_from: Union[None, datetime.datetime] = None,
+        doctype: str = None
     ) -> Sign1Message:
         """
             sign a mso and returns it
@@ -205,7 +205,7 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
         else:
             # five years
             exp = utcnow + datetime.timedelta(hours=(24 * 365) * 5)
-        
+
         payload = {
             'version': '1.0',
             'digestAlgorithm': settings.HASHALG_MAP[settings.PYMDOC_HASHALG],
@@ -220,16 +220,17 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
                 'validUntil': cbor2.dumps(cbor2.CBORTag(0, self.format_datetime_repr(exp)))
             }
         }
-        
+
         mso = Sign1Message(
-            phdr = {
-                Algorithm: self.private_key.alg, 
+            phdr={
+                Algorithm: self.private_key.alg,
                 KID: self.private_key.kid,
                 33: self.selfsigned_x509cert()
             },
             # TODO: x509 (cbor2.CBORTag(33)) and federation trust_chain support (cbor2.CBORTag(27?)) here
-            uhdr =  {33: self.selfsigned_x509cert()}, # 33 means x509chain standing to rfc9360
-            payload = cbor2.dumps(payload)
+            # 33 means x509chain standing to rfc9360
+            uhdr={33: self.selfsigned_x509cert()},
+            payload=cbor2.dumps(payload)
         )
-        mso.key = self.private_key            
+        mso.key = self.private_key
         return mso
