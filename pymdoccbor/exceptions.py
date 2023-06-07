@@ -11,6 +11,5 @@ class MsoPrivateKeyRequired(Exception):
     pass
 
 
-
 class MsoX509ChainNotFound(Exception):
     pass

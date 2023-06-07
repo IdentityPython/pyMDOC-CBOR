@@ -12,7 +12,11 @@ from pycose.messages import Sign1Message
 
 from typing import Optional, Union
 
-from . exceptions import MsoPrivateKeyRequired, UnsupportedMsoDataFormat
+from . exceptions import (
+    MsoX509ChainNotFound,
+    MsoPrivateKeyRequired,
+    UnsupportedMsoDataFormat
+)
 from . x509 import MsoX509Fabric
 from . settings import COSEKEY_HAZMAT_CRV_MAP, CRV_LEN_MAP
 from . tools import cborlist2CoseSign1, shuffle_dict
@@ -91,12 +95,12 @@ class MsoParser(MobileSecurityObject):
         for h, v in _mixed_heads:
             if h.identifier == 33:
                 return list(self.object.uhdr.values())
-        
+
         raise MsoX509ChainNotFound(
             "I can't find any valid X509certs, identified by label number 33, "
             "in this MSO."
         )
-        
+
     def attest_public_key(self):
         logger.warning(
             "TODO: in next releases. "
@@ -241,7 +245,8 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
             },
             # TODO: x509 (cbor2.CBORTag(33)) and federation trust_chain support (cbor2.CBORTag(27?)) here
             # 33 means x509chain standing to rfc9360
-            uhdr={33: self.selfsigned_x509cert()}, # in both protected and unprotected for interop purpose .. for now.
+            # in both protected and unprotected for interop purpose .. for now.
+            uhdr={33: self.selfsigned_x509cert()},
             payload=cbor2.dumps(payload)
         )
         mso.key = self.private_key
