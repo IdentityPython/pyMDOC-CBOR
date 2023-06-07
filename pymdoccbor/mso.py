@@ -83,14 +83,26 @@ class MsoParser(MobileSecurityObject):
 
     @property
     def raw_public_keys(self) -> bytes:
-        return list(self.object.uhdr.values())
-
+        """
+            it returns the public key extract from x509 certificates 
+            looking to both phdr and uhdr
+        """
+        _mixed_heads = self.object.phdr.items() | self.object.uhdr.items()
+        for h, v in _mixed_heads:
+            if h.identifier == 33:
+                return list(self.object.uhdr.values())
+        
+        raise MsoX509ChainNotFound(
+            "I can't find any valid X509certs, identified by label number 33, "
+            "in this MSO."
+        )
+        
     def attest_public_key(self):
         logger.warning(
             "TODO: in next releases. "
             "The certificate is to be considered as untrusted, this release "
             "doesn't validate x.509 certificate chain. See next releases and "
-            "python certvalidator or cryptography for that"
+            "python certvalidator or cryptography for that."
         )
 
     def load_public_key(self):
@@ -168,8 +180,8 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
                 self.disclosure_map[ns][digest_cnt] = {
                     'digestID': digest_cnt,
                     'random': _rnd_salt,
-                    'elementIdentifier': 'family_name',
-                    'elementValue': 'Doe'
+                    'elementIdentifier': k,
+                    'elementValue': v
                 }
 
                 self.hash_map[ns][digest_cnt] = hashfunc(
@@ -229,7 +241,7 @@ class MsoIssuer(MobileSecurityObject, MsoX509Fabric):
             },
             # TODO: x509 (cbor2.CBORTag(33)) and federation trust_chain support (cbor2.CBORTag(27?)) here
             # 33 means x509chain standing to rfc9360
-            uhdr={33: self.selfsigned_x509cert()},
+            uhdr={33: self.selfsigned_x509cert()}, # in both protected and unprotected for interop purpose .. for now.
             payload=cbor2.dumps(payload)
         )
         mso.key = self.private_key
