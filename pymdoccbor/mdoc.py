@@ -70,7 +70,7 @@ class MdocCbor:
         self.data_as_bytes = binascii.unhexlify(data)
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
 
-    def dump(self):
+    def dump(self) -> bytes:
         return self.data_as_bytes
 
     def dumps(self) -> str:
@@ -80,10 +80,10 @@ class MdocCbor:
         return binascii.hexlify(self.data_as_bytes)
 
     @property
-    def data_as_string(self):
+    def data_as_string(self) -> str:
         return self.dumps().decode()
 
-    def verify(self):
+    def verify(self) -> bool:
 
         cdict = self.data_as_cbor_dict
 

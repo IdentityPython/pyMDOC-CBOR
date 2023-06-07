@@ -20,18 +20,18 @@ class IssuerSigned:
     """
 
     def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]):
-        self.namespaces: dict = nameSpaces
+        self.namespaces :dict = nameSpaces
 
         #  if isinstance(ia, dict):
         self.issuer_auth = MsoParser(issuerAuth)
 
-    def dump(self):
+    def dump(self) -> dict:
         return {
             'nameSpaces': self.namespaces,
             'issuerAuth': self.issuer_auth
         }
 
-    def dumps(self):
+    def dumps(self) -> dict:
         return cbor2.dumps(
             {
                 'nameSpaces': self.namespaces,
