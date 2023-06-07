@@ -5,8 +5,8 @@ import logging
 from pycose.keys import CoseKey
 from typing import List, Union
 
-from . exceptions import InvalidMdoc
-from . issuersigned import IssuerSigned
+from pymdoccbor.exceptions import InvalidMdoc
+from pymdoccbor.mdoc.issuersigned import IssuerSigned
 
 logger = logging.getLogger('pymdoccbor')
 
@@ -50,10 +50,6 @@ class MobileDocument:
 
 class MdocCbor:
 
-    version: str = '1.0'
-    documents: List[MobileDocument] = []
-    status: int = 0
-
     def __init__(self, private_key: Union[dict, CoseKey] = {}):
         self.data_as_bytes: bytes = b""
         self.data_as_cbor_dict: dict = {}
@@ -66,39 +62,13 @@ class MdocCbor:
 
     def loads(self, data: str):
         """
-        data is a AF BINARY 
+        data is a AF BINARY
         """
         if isinstance(data, bytes):
             data = binascii.hexlify(data)
 
         self.data_as_bytes = binascii.unhexlify(data)
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
-
-    def new(
-        self, 
-        data :dict, 
-        devicekeyinfo :Union[dict, CoseKey],
-        doctype :str
-    ):
-        """
-        create a new mdoc with signed mso
-        """
-        if isinstance(dkeyinfo, dict):
-            devicekeyinfo = CoseKey.from_dict(devicekeyinfo)
-        else:
-            devicekeyinfo = CoseKey
-        
-        
-        # TODO
-        res = {
-            'docType': doctype, # 'org.iso.18013.5.1.mDL'
-            'issuerSigned': {
-            
-            },
-            'deviceSigned': {
-                # TODO
-            }
-        }
 
     def dump(self) -> bytes:
         return self.data_as_bytes

@@ -1,5 +1,5 @@
 
-from pymdoccbor.mdoc import MdocCbor
+from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.tools import pretty_print
 
 

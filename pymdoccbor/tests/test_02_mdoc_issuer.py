@@ -2,7 +2,7 @@ import os
 
 from pycose.messages import Sign1Message
 
-from pymdoccbor.mso import MsoIssuer
+from pymdoccbor.mso.issuer import MsoIssuer
 from . pid_data import PID_DATA
 
 
@@ -26,6 +26,6 @@ def test_mso_writer():
     mso = msow.sign()
 
     Sign1Message.decode(mso.encode())
-    
+
     # TODO: assertion about the content
     #  breakpoint()
