@@ -26,6 +26,6 @@ def test_mso_writer():
     mso = msow.sign()
 
     Sign1Message.decode(mso.encode())
-
+    
     # TODO: assertion about the content
-    # breakpoint()
+    #  breakpoint()

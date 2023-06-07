@@ -74,18 +74,31 @@ class MdocCbor:
         self.data_as_bytes = binascii.unhexlify(data)
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
 
-    # TODO
-    #  def new(self, data :dict, dkeyinfo :Union[dict, CoseKey]):
-        #  """
-        #  create a new mdoc with signed mso
-
-        #  data has this structure:
-        #  {
-        #  namespace: { k:v}
-        #  }
-        #  """
-        #  if isinstance(dkeyinfo, dict):
-        #  dkeyinfo = CoseKey.from_dict(self.private_key)
+    def new(
+        self, 
+        data :dict, 
+        devicekeyinfo :Union[dict, CoseKey],
+        doctype :str
+    ):
+        """
+        create a new mdoc with signed mso
+        """
+        if isinstance(dkeyinfo, dict):
+            devicekeyinfo = CoseKey.from_dict(devicekeyinfo)
+        else:
+            devicekeyinfo = CoseKey
+        
+        
+        # TODO
+        res = {
+            'docType': doctype, # 'org.iso.18013.5.1.mDL'
+            'issuerSigned': {
+            
+            },
+            'deviceSigned': {
+                # TODO
+            }
+        }
 
     def dump(self) -> bytes:
         return self.data_as_bytes
