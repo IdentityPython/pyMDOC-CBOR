@@ -37,15 +37,15 @@ def test_mso_writer():
 # TODO
 def _test_mdoc_issuer():
     mdoci = MdocCborIssuer(
-        private_key = PKEY
+        private_key=PKEY
     )
-    
+
     mdoc = mdoci.new(
-        doctype = "eu.europa.ec.eudiw.pid.1",
-        data = PID_DATA,
-        devicekeyinfo = PKEY # TODO
+        doctype="eu.europa.ec.eudiw.pid.1",
+        data=PID_DATA,
+        devicekeyinfo=PKEY  # TODO
     )
-    
+
     mdocp = MdocCbor()
     aa = cbor2.dumps(mdoc)
     mdocp.loads(aa)

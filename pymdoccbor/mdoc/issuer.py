@@ -55,7 +55,7 @@ class MdocCborIssuer:
                         "issuerAuth": mso.encode()
                     },
                     'deviceSigned': {
-                            # TODO
+                        # TODO
                     }
                 }
             ],

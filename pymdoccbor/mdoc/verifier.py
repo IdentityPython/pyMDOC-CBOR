@@ -2,8 +2,7 @@ import binascii
 import cbor2
 import logging
 
-from pycose.keys import CoseKey
-from typing import List, Union
+from typing import List
 
 from pymdoccbor.exceptions import InvalidMdoc
 from pymdoccbor.mdoc.issuersigned import IssuerSigned
