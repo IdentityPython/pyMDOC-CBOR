@@ -12,7 +12,7 @@ from pymdoccbor.exceptions import (
     UnsupportedMsoDataFormat
 )
 from pymdoccbor import settings
-from pymdoccbor.tools import cborlist2CoseSign1
+from pymdoccbor.tools import bytes2CoseSign1, cborlist2CoseSign1
 
 
 logger = logging.getLogger("pymdoccbor")
@@ -35,12 +35,10 @@ class MsoVerifier:
         self._data = data
 
         # not used
-        #  if isinstance(data, bytes):
-        #  self.object: Sign1Message = bytes2CoseSign1(
-        #  cbor2.dumps(cbor2.CBORTag(18, value=data)))
-        #  el
-
-        if isinstance(data, list):
+        if isinstance(data, bytes):
+            self.object: Sign1Message = bytes2CoseSign1(
+            cbor2.dumps(cbor2.CBORTag(18, value=data)))
+        elif isinstance(data, list):
             self.object: Sign1Message = cborlist2CoseSign1(self._data)
         else:
             raise UnsupportedMsoDataFormat(

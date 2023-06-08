@@ -14,6 +14,8 @@ class MdocCborIssuer:
     def __init__(self, private_key: Union[dict, CoseKey] = {}):
         self.version: str = '1.0'
         self.status: int = 0
+        if private_key and isinstance(private_key, dict):
+            self.private_key = CoseKey.from_dict(private_key)
 
     def new(
         self,
@@ -46,13 +48,14 @@ class MdocCborIssuer:
                     'issuerSigned': {
                         "nameSpaces": {
                             ns: [
-                                cbor2.CBORTag(24, value=v) for v in dgst
+                                cbor2.CBORTag(24, value={k: v}) for k, v in dgst.items()
                             ]
-                            for ns, dgst in mso.disclosure_map.items()
+                            for ns, dgst in msoi.disclosure_map.items()
                         },
-                        'deviceSigned': {
+                        "issuerAuth": mso.encode()
+                    },
+                    'deviceSigned': {
                             # TODO
-                        }
                     }
                 }
             ],

@@ -50,15 +50,12 @@ class MobileDocument:
 
 class MdocCbor:
 
-    def __init__(self, private_key: Union[dict, CoseKey] = {}):
+    def __init__(self):
         self.data_as_bytes: bytes = b""
         self.data_as_cbor_dict: dict = {}
 
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
-
-        if private_key and isinstance(private_key, dict):
-            self.private_key = CoseKey.from_dict(private_key)
 
     def loads(self, data: str):
         """

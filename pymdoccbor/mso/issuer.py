@@ -34,6 +34,8 @@ class MsoIssuer(MsoX509Fabric):
             self.private_key = CoseKey.from_dict(private_key)
             if not self.private_key.kid:
                 self.private_key.kid = str(uuid.uuid4())
+        elif private_key and isinstance(private_key, CoseKey):
+            self.private_key = private_key
         else:
             raise MsoPrivateKeyRequired(
                 "MSO Writer requires a valid private key"
