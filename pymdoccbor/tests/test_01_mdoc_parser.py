@@ -30,7 +30,7 @@ def test_parse_mdoc_af_binary():
         assert i.is_valid
 
     assert len(mdoc.documents) == 1
-
+    
     # test repr
     mdoc.__repr__()
 

@@ -29,8 +29,17 @@ class MobileDocument:
             'docType': self.doctype,
             'issuerSigned': self.issuersigned.dump()
         }
-
-    def dumps(self) -> dict:
+    
+    def dumps(self) -> str:
+        """
+            returns an AF binary repr of the document
+        """
+        return binascii.hexlify(self.dump())
+    
+    def dump(self) -> bytes:
+        """
+            returns bytes
+        """
         return cbor2.dumps(
             cbor2.CBORTag(24, value={
                 'docType': self.doctype,
@@ -67,6 +76,9 @@ class MdocCbor:
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
 
     def dump(self) -> bytes:
+        """
+            returns bytes
+        """
         return self.data_as_bytes
 
     def dumps(self) -> str:

@@ -73,13 +73,13 @@ mso = msoi.sign()
 ````
 
 API usage:
- - `msow.data`, user attributes to be encoded
- - `msow.private_key`, COSEKey
- - `msow.public_key`, COSEKey without `d` (for EC2Key)
- - `msow.selfsigned_x509cert`, using the private and the public keys returns a self-signed x509 certificate
- - `msow.hash_map`, digests that will be signed in the MSO
- - `msow.disclosure_map`, disclosure objects grouped by namespaces
- - `msow.sign`, signs the MSO and returns it
+ - `msoi.data`, user attributes to be encoded
+ - `msoi.private_key`, COSEKey
+ - `msoi.public_key`, COSEKey without `d` (for EC2Key)
+ - `msoi.selfsigned_x509cert`, using the private and the public keys returns a self-signed x509 certificate
+ - `msoi.hash_map`, digests that will be signed in the MSO
+ - `msoi.disclosure_map`, disclosure objects grouped by namespaces
+ - `msoi.sign`, signs the MSO and returns it
 
 ### Parse a binary Mdoc 
 
@@ -91,8 +91,11 @@ mdoc.loads(ISSUED_MDOC)
 mdoc.verify()
 >> True
 
+mdoc
+>> [pymdoccbor.mdoc.verifier.MdocCbor [1 valid documents]]
+
 mdoc.documents
->> [[pymdoccbor.mdoc.verifier.MobileDocument [valid] [valid]]
+>> [pymdoccbor.mdoc.verifier.MobileDocument [valid]]
 ````
 
 ### Verify the Mobile Security Object
