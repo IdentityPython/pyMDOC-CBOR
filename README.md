@@ -39,7 +39,40 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 
 ## Usage
 
-### Issue an MSO
+### Issue an MDOC CBOR
+
+`MdocCborIssuer` need to be initialized with a private key.
+The method `.new()` gets the user attributes, devicekeyinfo and doctype.
+
+````
+from pymdoccbor.mdoc.issuer import MdocCborIssuer
+
+PKEY = {
+    'KTY': 'EC2',
+    'CURVE': 'P_256',
+    'ALG': 'ES256',
+    'D': os.urandom(32),
+    'KID': b"demo-kid"
+}
+
+mdoci = MdocCborIssuer(
+    private_key=PKEY
+)
+
+mdoc = mdoci.new(
+    doctype="eu.europa.ec.eudiw.pid.1",
+    data=PID_DATA,
+    devicekeyinfo=PKEY  # TODO
+)
+
+mdoc
+>> returns a python dictionay
+
+mdoc.dump()
+>> returns mdoc cbor bytes
+````
+
+### Issue an MSO alone
 
 MsoIssuer is a class that handles private keys, data processing, digests and signature operations.
 

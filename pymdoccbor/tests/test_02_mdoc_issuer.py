@@ -9,7 +9,7 @@ from pymdoccbor.mso.issuer import MsoIssuer
 from . pid_data import PID_DATA
 
 
-PKEY = key_attribute_dict = {
+PKEY = {
     'KTY': 'EC2',
     'CURVE': 'P_256',
     'ALG': 'ES256',
@@ -34,7 +34,6 @@ def test_mso_writer():
     #  breakpoint()
 
 
-# TODO
 def test_mdoc_issuer():
     mdoci = MdocCborIssuer(
         private_key=PKEY
@@ -50,3 +49,7 @@ def test_mdoc_issuer():
     aa = cbor2.dumps(mdoc)
     mdocp.loads(aa)
     mdocp.verify()
+    
+    mdoci.dump()
+    mdoci.dumps()
+    

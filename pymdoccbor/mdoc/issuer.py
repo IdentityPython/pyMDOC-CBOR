@@ -1,3 +1,4 @@
+import binascii
 import cbor2
 import logging
 
@@ -16,6 +17,8 @@ class MdocCborIssuer:
         self.status: int = 0
         if private_key and isinstance(private_key, dict):
             self.private_key = CoseKey.from_dict(private_key)
+        
+        self.signed :dict = {}
 
     def new(
         self,
@@ -61,5 +64,18 @@ class MdocCborIssuer:
             ],
             'status': self.status
         }
+        
+        self.signed = res
+        return self.signed
+    
+    def dump(self):
+        """
+            returns bytes
+        """
+        return cbor2.dumps(self.signed)
 
-        return res
+    def dumps(self):
+        """
+            returns AF binary repr
+        """
+        return binascii.hexlify(cbor2.dumps(self.signed))
