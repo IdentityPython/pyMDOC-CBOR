@@ -55,6 +55,14 @@ PKEY = {
     'KID': b"demo-kid"
 }
 
+PID_DATA = {
+        "eu.europa.ec.eudiw.pid.1": {
+            "family_name": "Raffaello",
+            "given_name": "Mascetti",
+            "birth_date": "1922-03-13"
+        }
+    }
+
 mdoci = MdocCborIssuer(
     private_key=PKEY
 )
