@@ -33,12 +33,11 @@ class MsoVerifier:
 
     def __init__(self, data: cbor2.CBORTag):
         self._data = data
-
         # not used
-        if isinstance(data, bytes):
+        if isinstance(self._data, bytes):
             self.object: Sign1Message = bytes2CoseSign1(
-                cbor2.dumps(cbor2.CBORTag(18, value=data)))
-        elif isinstance(data, list):
+                cbor2.dumps(cbor2.CBORTag(18, value=self._data)))
+        elif isinstance(self._data, list):
             self.object: Sign1Message = cborlist2CoseSign1(self._data)
         else:
             raise UnsupportedMsoDataFormat(

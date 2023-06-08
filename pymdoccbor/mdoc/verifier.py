@@ -80,7 +80,6 @@ class MdocCbor:
         return self.dumps().decode()
 
     def verify(self) -> bool:
-
         cdict = self.data_as_cbor_dict
 
         for i in ('version', 'documents'):

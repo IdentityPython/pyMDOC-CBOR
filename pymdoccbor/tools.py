@@ -14,7 +14,7 @@ def bytes2CoseSign1(data: bytes) -> Sign1Message:
     """
     Gets bytes and return a COSE_Sign1 object
     """
-    decoded = Sign1Message.decode(data)
+    decoded = Sign1Message.decode(cbor2.loads(data).value)
 
     return decoded
 

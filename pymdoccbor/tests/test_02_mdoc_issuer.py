@@ -35,7 +35,7 @@ def test_mso_writer():
 
 
 # TODO
-def _test_mdoc_issuer():
+def test_mdoc_issuer():
     mdoci = MdocCborIssuer(
         private_key=PKEY
     )
