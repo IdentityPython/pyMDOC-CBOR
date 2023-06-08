@@ -1,6 +1,6 @@
 # pyMDOC-CBOR
 
-Python parser and writer for eIDAS MDOC CBOR.
+Python parser and writer for EUDI Wallet MDOC CBOR for credential Type 1 and also or mDL use cases.
 
 > This project is an experimental proposal born for educational purposes. Please do not consider it as usable before the release 0.6.0.
 
@@ -77,7 +77,13 @@ mdoc
 >> returns a python dictionay
 
 mdoc.dump()
->> returns mdoc cbor bytes
+>> returns mdoc mso bytes
+
+mdoci.dump()
+>> returns bytes
+
+mdoci.dumps()
+>> returns AF Binary string representation
 ````
 
 ### Issue an MSO alone
