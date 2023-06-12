@@ -22,8 +22,8 @@ pyMDOC-CBOR is a
 [cbor2](https://github.com/agronholm/cbor2) 
 and 
 [pycose](https://github.com/TimothyClaeys/pycose) 
-wrapper that parses, creates and validates MDOC CBOR encoded binaries, 
-as defined in ISO 18013-5.
+wrapper that parses, creates and validates MDOC CBOR encoded binaries 
+according to ISO 18013-5.
 
 ## Setup
 
@@ -41,7 +41,7 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 
 ### Issue an MDOC CBOR
 
-`MdocCborIssuer` need to be initialized with a private key.
+`MdocCborIssuer` must be initialized with a private key.
 The method `.new()` gets the user attributes, devicekeyinfo and doctype.
 
 ````
@@ -77,13 +77,13 @@ mdoc
 >> returns a python dictionay
 
 mdoc.dump()
->> returns mdoc mso bytes
+>> returns mdoc MSO bytes
 
 mdoci.dump()
->> returns bytes
+>> returns mdoc bytes
 
 mdoci.dumps()
->> returns AF Binary string representation
+>> returns AF Binary mdoc string representation
 ````
 
 ### Issue an MSO alone
@@ -91,7 +91,7 @@ mdoci.dumps()
 MsoIssuer is a class that handles private keys, data processing, digests and signature operations.
 
 The `disclosure_map` is used in the Mdoc `nameSpaces` object for issuance and presentations,
-it's carried in the mdoc but outside the MSO, even if it is produced by `MsoIssuer`.
+it's carried in the mdoc but outside of the MSO, even if it is produced by `MsoIssuer`.
 that's why `MsoIssuer.sign()` returns a pure MSO, while `disclosure_map` 
 is an attribute of the `MsoIssuer` instance.
 
@@ -139,7 +139,7 @@ mdoc.verify()
 >> True
 
 mdoc
->> [pymdoccbor.mdoc.verifier.MdocCbor [1 valid documents]]
+>> pymdoccbor.mdoc.verifier.MdocCbor [1 valid documents]
 
 mdoc.documents
 >> [pymdoccbor.mdoc.verifier.MobileDocument [valid]]
