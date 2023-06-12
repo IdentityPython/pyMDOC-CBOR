@@ -120,7 +120,9 @@ class MsoIssuer(MsoX509Fabric):
                 'validUntil': cbor2.dumps(cbor2.CBORTag(0, self.format_datetime_repr(exp)))
             }
         }
-
+        
+        _cert = settings.X509_DER_CERT or self.selfsigned_x509cert()
+        
         mso = Sign1Message(
             phdr={
                 Algorithm: self.private_key.alg,
@@ -130,7 +132,7 @@ class MsoIssuer(MsoX509Fabric):
             # TODO: x509 (cbor2.CBORTag(33)) and federation trust_chain support (cbor2.CBORTag(27?)) here
             # 33 means x509chain standing to rfc9360
             # in both protected and unprotected for interop purpose .. for now.
-            uhdr={33: self.selfsigned_x509cert()},
+            uhdr={33: _cert},
             payload=cbor2.dumps(payload)
         )
         mso.key = self.private_key
