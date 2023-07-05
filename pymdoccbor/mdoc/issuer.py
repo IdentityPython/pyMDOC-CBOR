@@ -43,7 +43,7 @@ class MdocCborIssuer:
 
         # TODO: for now just a single document, it would be trivial having
         # also multiple but for now I don't have use cases for this
-        res = {
+        self.signed = {
             'version': self.version,
             'documents': [
                 {
@@ -57,15 +57,14 @@ class MdocCborIssuer:
                         },
                         "issuerAuth": mso.encode()
                     },
-                    'deviceSigned': {
-                        # TODO
-                    }
+                    # this is required during the presentation.
+                    #  'deviceSigned': {
+                        #  # TODO
+                    #  }
                 }
             ],
             'status': self.status
         }
-        
-        self.signed = res
         return self.signed
     
     def dump(self):

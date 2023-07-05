@@ -28,13 +28,13 @@ according to ISO 18013-5.
 ## Setup
 
 ````
-pip install pymdlmdoc
+pip install pymdoccbor
 ````
 
 or
 
 ````
-pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
+pip install git+https://github.com/peppelinux/pyMDOC-CBOR.git
 ````
 
 ## Usage
@@ -45,6 +45,8 @@ pip install git+https://github.com/peppelinux/pyMDL-MDOC.git
 The method `.new()` gets the user attributes, devicekeyinfo and doctype.
 
 ````
+import os
+
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 
 PKEY = {
@@ -56,12 +58,17 @@ PKEY = {
 }
 
 PID_DATA = {
-        "eu.europa.ec.eudiw.pid.1": {
-            "family_name": "Raffaello",
-            "given_name": "Mascetti",
-            "birth_date": "1922-03-13"
-        }
+    "eu.europa.ec.eudiw.pid.1": {
+        "family_name": "Raffaello",
+        "given_name": "Mascetti",
+        "birth_date": "1922-03-13",
+        "birth_place": "Rome",
+        "birth_country": "IT"
+    },
+    "eu.europa.ec.eudiw.pid.it.1": {
+        "tax_id_code": "TINIT-XXXXXXXXXXXXXXX"
     }
+}
 
 mdoci = MdocCborIssuer(
     private_key=PKEY
@@ -76,14 +83,11 @@ mdoc = mdoci.new(
 mdoc
 >> returns a python dictionay
 
-mdoc.dump()
->> returns mdoc MSO bytes
-
 mdoci.dump()
 >> returns mdoc bytes
 
 mdoci.dumps()
->> returns AF Binary mdoc string representation
+>> returns AF Binary string representation
 ````
 
 ### Issue an MSO alone

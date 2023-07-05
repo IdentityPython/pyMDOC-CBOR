@@ -65,13 +65,14 @@ class MdocCbor:
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
 
+    def load(self, data: bytes):
+        data = binascii.hexlify(data)
+        return self.loads(data)
+
     def loads(self, data: str):
         """
         data is a AF BINARY
         """
-        if isinstance(data, bytes):
-            data = binascii.hexlify(data)
-
         self.data_as_bytes = binascii.unhexlify(data)
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
 

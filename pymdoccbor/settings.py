@@ -20,7 +20,6 @@ HASHALG_MAP = {
 
 DIGEST_SALT_LENGTH = 32
 
-
 X509_DER_CERT = os.getenv('X509_DER_CERT', None)
 
 # OR
@@ -44,5 +43,7 @@ X509_SAN_URL = os.getenv(
     'X509_SAN_URL', u"https://credential-issuer.oidc-federation.online"
 )
 
-
+CBORTAGS_ATTR_MAP = {
+    "birth_date": 1004
+}
 

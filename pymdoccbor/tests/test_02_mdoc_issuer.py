@@ -47,7 +47,7 @@ def test_mdoc_issuer():
 
     mdocp = MdocCbor()
     aa = cbor2.dumps(mdoc)
-    mdocp.loads(aa)
+    mdocp.load(aa)
     mdocp.verify()
     
     mdoci.dump()

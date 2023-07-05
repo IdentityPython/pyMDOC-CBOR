@@ -64,7 +64,12 @@ class MsoIssuer(MsoX509Fabric):
             for k, v in shuffle_dict(values).items():
 
                 _rnd_salt = secrets.token_bytes(settings.DIGEST_SALT_LENGTH)
-
+                
+                _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k, None)
+                
+                if _value_cbortag:
+                    v = cbor2.CBORTag(_value_cbortag, value=v)
+                
                 self.disclosure_map[ns][digest_cnt] = {
                     'digestID': digest_cnt,
                     'random': _rnd_salt,
