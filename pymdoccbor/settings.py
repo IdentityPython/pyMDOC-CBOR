@@ -44,6 +44,8 @@ X509_SAN_URL = os.getenv(
 )
 
 CBORTAGS_ATTR_MAP = {
-    "birth_date": 1004
+    "birth_date": 1004,
+    "expiry_date": 1004,
+    "issue_date": 1004
 }
 
