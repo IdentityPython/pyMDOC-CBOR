@@ -214,7 +214,7 @@ Other examples at [cbor official documentation](https://github.com/agronholm/cbo
 
 - [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py)
 - [Authlete's CBOR diagnostic tools](https://nextdev-api.authlete.net/api/cbor)
-- [Autho0 CBOR diagnostic tool](https://www.mdl.me/)
+- [Auth0 CBOR diagnostic tool](https://www.mdl.me/)
 
 #### X.509 certificates and chains
 
