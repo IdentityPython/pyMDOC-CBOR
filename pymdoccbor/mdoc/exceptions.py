@@ -6,3 +6,6 @@ class NoDocumentTypeProvided(Exception):
 
 class NoSignedDocumentProvided(Exception):
     pass
+
+class MissingIssuerAuth(Exception):
+    pass

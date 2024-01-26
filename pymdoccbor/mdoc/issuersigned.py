@@ -25,7 +25,9 @@ class IssuerSigned:
     def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]):
         self.namespaces: dict = nameSpaces
 
-        #  if isinstance(ia, dict):
+        if not issuerAuth:
+            raise MissingIssuerAuth("issuerAuth must be provided")
+
         self.issuer_auth = MsoVerifier(issuerAuth)
 
     def dump(self) -> dict:
