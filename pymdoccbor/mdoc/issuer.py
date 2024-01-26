@@ -27,10 +27,10 @@ class MdocCborIssuer:
 
     def new(
         self,
-        data: dict,
+        data: dict | list[dict],
         devicekeyinfo: Union[dict, CoseKey],
-        doctype: str
-    ):
+        doctype: str | None = None
+    ) -> dict:
         """
         create a new mdoc with signed mso
         """
@@ -39,35 +39,41 @@ class MdocCborIssuer:
         else:
             devicekeyinfo: CoseKey = devicekeyinfo
 
-        msoi = MsoIssuer(
-            data=data,
-            private_key=self.private_key
-        )
+        if isinstance(data, dict):
+            data = [{"doctype": doctype, "data": data}]
 
-        mso = msoi.sign()
+        documents = []
 
-        # TODO: for now just a single document, it would be trivial having
-        # also multiple but for now I don't have use cases for this
+        for doc in data:
+            msoi = MsoIssuer(
+                data=doc["data"],
+                private_key=self.private_key
+            )
+
+            mso = msoi.sign()
+
+            document = {
+                'docType': doc["doctype"],  # 'org.iso.18013.5.1.mDL'
+                'issuerSigned': {
+                    "nameSpaces": {
+                        ns: [
+                            cbor2.CBORTag(24, value={k: v}) for k, v in dgst.items()
+                        ]
+                        for ns, dgst in msoi.disclosure_map.items()
+                    },
+                    "issuerAuth": mso.encode()
+                },
+                # this is required during the presentation.
+                #  'deviceSigned': {
+                    #  # TODO
+                #  }
+            }
+
+            documents.append(document)
+
         self.signed = {
             'version': self.version,
-            'documents': [
-                {
-                    'docType': doctype,  # 'org.iso.18013.5.1.mDL'
-                    'issuerSigned': {
-                        "nameSpaces": {
-                            ns: [
-                                cbor2.CBORTag(24, value={k: v}) for k, v in dgst.items()
-                            ]
-                            for ns, dgst in msoi.disclosure_map.items()
-                        },
-                        "issuerAuth": mso.encode()
-                    },
-                    # this is required during the presentation.
-                    #  'deviceSigned': {
-                        #  # TODO
-                    #  }
-                }
-            ],
+            'documents': documents,
             'status': self.status
         }
         return self.signed
