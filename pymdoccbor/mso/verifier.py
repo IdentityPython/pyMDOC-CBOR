@@ -57,12 +57,12 @@ class MsoVerifier:
         self.x509_certificates: list = []
 
     @property
-    def payload_as_cbor(self) -> cbor2.CBORTag:
+    def payload_as_cbor(self) -> dict:
         """
         Return the decoded payload
 
         :return: the decoded payload
-        :rtype: cbor2.CBORTag
+        :rtype: dict
         """
         return cbor2.loads(self.object.payload)
 
