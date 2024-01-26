@@ -6,15 +6,20 @@ from pycose.keys import CoseKey
 from typing import Union
 
 from pymdoccbor.mso.issuer import MsoIssuer
+from pymdoccbor.mdoc.exceptions import MissingPrivateKey
 
 logger = logging.getLogger('pymdoccbor')
 
 
 class MdocCborIssuer:
 
-    def __init__(self, private_key: Union[dict, CoseKey] = {}):
+    def __init__(self, private_key: Union[dict, CoseKey]):
         self.version: str = '1.0'
         self.status: int = 0
+
+        if not private_key:
+            raise MissingPrivateKey("You must provide a private key")
+
         if private_key and isinstance(private_key, dict):
             self.private_key = CoseKey.from_dict(private_key)
         

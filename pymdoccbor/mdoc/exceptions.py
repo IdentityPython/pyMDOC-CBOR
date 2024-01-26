@@ -1,0 +1,2 @@
+class MissingPrivateKey(Exception):
+    pass
