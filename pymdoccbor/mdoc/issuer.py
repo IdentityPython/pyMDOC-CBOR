@@ -12,8 +12,19 @@ logger = logging.getLogger('pymdoccbor')
 
 
 class MdocCborIssuer:
+    """
+    MdocCborIssuer helper class to create a new mdoc
+    """
 
     def __init__(self, private_key: Union[dict, CoseKey]):
+        """
+        Create a new MdocCborIssuer instance
+
+        :param private_key: the private key to sign the mdoc
+        :type private_key: dict | CoseKey
+
+        :raises MissingPrivateKey: if no private key is provided
+        """
         self.version: str = '1.0'
         self.status: int = 0
 
@@ -33,6 +44,19 @@ class MdocCborIssuer:
     ) -> dict:
         """
         create a new mdoc with signed mso
+
+        :param data: the data to sign
+        Can be a dict, representing the single document, or a list of dicts containg the doctype and the data
+        Example:
+        {doctype: "org.iso.18013.5.1.mDL", data: {...}}
+        :type data: dict | list[dict]
+        :param devicekeyinfo: the device key info
+        :type devicekeyinfo: dict | CoseKey
+        :param doctype: the document type (optional if data is a list)
+        :type doctype: str | None
+
+        :return: the signed mdoc
+        :rtype: dict
         """
         if isinstance(devicekeyinfo, dict):
             devicekeyinfo = CoseKey.from_dict(devicekeyinfo)
@@ -80,12 +104,18 @@ class MdocCborIssuer:
     
     def dump(self):
         """
-            returns bytes
+        Returns the signed mdoc in CBOR format
+
+        :return: the signed mdoc in CBOR format
+        :rtype: bytes
         """
         return cbor2.dumps(self.signed)
 
     def dumps(self):
         """
-            returns AF binary repr
+        Returns the signed mdoc in AF binary repr
+
+        :return: the signed mdoc in AF binary repr
+        :rtype: bytes
         """
         return binascii.hexlify(cbor2.dumps(self.signed))
