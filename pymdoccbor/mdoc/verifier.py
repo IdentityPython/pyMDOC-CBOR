@@ -25,7 +25,7 @@ class MobileDocument:
             raise NoSignedDocumentProvided("You must provide a signed document")
         
         self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
-        self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
+        self.issuersigned: IssuerSigned = IssuerSigned(**issuerSigned)
         self.is_valid = False
 
         # TODO
