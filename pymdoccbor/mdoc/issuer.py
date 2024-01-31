@@ -2,7 +2,7 @@ import binascii
 import cbor2
 import logging
 
-from pycose.keys import CoseKey
+from pycose.keys import CoseKey, EC2Key
 from typing import Union
 
 from pymdoccbor.mso.issuer import MsoIssuer
@@ -16,7 +16,7 @@ class MdocCborIssuer:
     MdocCborIssuer helper class to create a new mdoc
     """
 
-    def __init__(self, private_key: Union[dict, CoseKey]):
+    def __init__(self, private_key: Union[dict, EC2Key, CoseKey]):
         """
         Create a new MdocCborIssuer instance
 
@@ -28,11 +28,17 @@ class MdocCborIssuer:
         self.version: str = '1.0'
         self.status: int = 0
 
-        if not private_key:
+        if isinstance(private_key, dict):
+            self.private_key = CoseKey.from_dict(private_key)
+        elif isinstance(private_key, EC2Key):
+            ec2_encoded = private_key.encode()
+            ec2_decoded = CoseKey.decode(ec2_encoded)
+            self.private_key = ec2_decoded
+        elif isinstance(private_key, CoseKey):
+            self.private_key = private_key
+        else:
             raise MissingPrivateKey("You must provide a private key")
 
-        if private_key and isinstance(private_key, dict):
-            self.private_key = CoseKey.from_dict(private_key)
         
         self.signed :dict = {}
 

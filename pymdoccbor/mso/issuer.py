@@ -26,7 +26,7 @@ class MsoIssuer(MsoX509Fabric):
     def __init__(
         self,
         data: dict,
-        private_key: Union[dict, CoseKey],
+        private_key: Union[dict, EC2Key, CoseKey],
         digest_alg: str = settings.PYMDOC_HASHALG
     ):
         """
@@ -48,6 +48,10 @@ class MsoIssuer(MsoX509Fabric):
                 self.private_key.kid = str(uuid.uuid4())
         elif private_key and isinstance(private_key, CoseKey):
             self.private_key = private_key
+        elif private_key and isinstance(private_key, EC2Key):
+            ec2_encoded = private_key.encode()
+            ec2_decoded = CoseKey.decode(ec2_encoded)
+            self.private_key = ec2_decoded
         else:
             raise MsoPrivateKeyRequired(
                 "MSO Writer requires a valid private key"
