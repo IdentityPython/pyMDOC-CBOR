@@ -1,15 +1,9 @@
-import os
+from pycose.keys import EC2Key
 from pycose.messages import CoseMessage
 from pymdoccbor.mso.issuer import MsoIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 
-PKEY = {
-    'KTY': 'EC2',
-    'CURVE': 'P_256',
-    'ALG': 'ES256',
-    'D': os.urandom(32),
-    'KID': b"demo-kid"
-}
+PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
 
 def test_mso_issuer_fail():
     try:

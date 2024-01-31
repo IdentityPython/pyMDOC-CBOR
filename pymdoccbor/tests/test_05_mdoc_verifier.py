@@ -1,15 +1,9 @@
-import os
+from pycose.keys import EC2Key
 from pymdoccbor.mdoc.verifier import MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 
-PKEY = {
-    'KTY': 'EC2',
-    'CURVE': 'P_256',
-    'ALG': 'ES256',
-    'D': os.urandom(32),
-    'KID': b"demo-kid"
-}
+PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
 
 mdoc = MdocCborIssuer(PKEY)
 mdoc.new(
@@ -59,4 +53,4 @@ def test_mobile_document_verify():
     document = mdoc.signed["documents"][0]
     doc = MobileDocument(**document)
 
-    #assert mdoc.verify() == True
+    assert doc.verify() == True

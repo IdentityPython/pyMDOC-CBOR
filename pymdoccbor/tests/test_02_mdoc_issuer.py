@@ -2,21 +2,14 @@ import cbor2
 import os
 
 from pycose.messages import Sign1Message
-
+from pycose.keys import EC2Key
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.mso.issuer import MsoIssuer
 from . pid_data import PID_DATA
 
 
-PKEY = {
-    'KTY': 'EC2',
-    'CURVE': 'P_256',
-    'ALG': 'ES256',
-    'D': os.urandom(32),
-    'KID': b"demo-kid"
-}
-
+PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
 
 def test_mso_writer():
     msoi = MsoIssuer(

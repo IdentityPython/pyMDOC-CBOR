@@ -1,16 +1,11 @@
 import os
+from pycose.keys import CoseKey, EC2Key
 from pymdoccbor.mso.verifier import MsoVerifier
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pycose.messages import CoseMessage
 
-PKEY = {
-    'KTY': 'EC2',
-    'CURVE': 'P_256',
-    'ALG': 'ES256',
-    'D': os.urandom(32),
-    'KID': b"demo-kid"
-}
+PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
 
 mdoc = MdocCborIssuer(PKEY)
 mdoc.new(
