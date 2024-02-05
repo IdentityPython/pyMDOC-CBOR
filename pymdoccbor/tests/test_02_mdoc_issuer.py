@@ -6,10 +6,10 @@ from pycose.keys import EC2Key
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.mso.issuer import MsoIssuer
-from . pid_data import PID_DATA
+from pymdoccbor.tests.pid_data import PID_DATA
+from pymdoccbor.tests.pkey import PKEY
 
 
-PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
 
 def test_mso_writer():
     msoi = MsoIssuer(

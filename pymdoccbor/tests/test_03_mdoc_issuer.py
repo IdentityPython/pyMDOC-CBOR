@@ -2,9 +2,7 @@ from pycose.keys import EC2Key
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pid_data import PID_DATA
-
-
-PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
+from pymdoccbor.tests.pkey import PKEY
 
 mdoc = MdocCborIssuer(PKEY)
 

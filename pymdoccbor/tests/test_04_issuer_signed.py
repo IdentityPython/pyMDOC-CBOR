@@ -3,8 +3,8 @@ from pymdoccbor.mdoc.issuersigned import IssuerSigned
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.test_03_mdoc_issuer import mdoc
+from pymdoccbor.tests.pkey import PKEY
 
-PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
 
 mdoc = MdocCborIssuer(PKEY)
 mdoc.new(

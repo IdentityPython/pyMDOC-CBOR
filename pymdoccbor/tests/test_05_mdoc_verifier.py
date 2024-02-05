@@ -2,15 +2,7 @@ from pycose.keys import EC2Key
 from pymdoccbor.mdoc.verifier import MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
-
-PKEY = EC2Key.generate_key(crv="P_256", optional_params={"ALG": "ES256"})
-
-mdoc = MdocCborIssuer(PKEY)
-mdoc.new(
-    data=MICOV_DATA,
-    devicekeyinfo=PKEY,  # TODO
-    doctype="org.micov.medical.1"
-)
+from pymdoccbor.tests.pkey import PKEY
 
 def test_verifier_must_fail_document_type():
     try:
@@ -25,6 +17,14 @@ def test_verifier_must_fail_issuer_signed():
         assert str(e) == "You must provide a signed document"
 
 def test_mobile_document():
+    mdoc = MdocCborIssuer(PKEY)
+    mdoc.new(
+        data=MICOV_DATA,
+        devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1"
+    )
+
+
     document = mdoc.signed["documents"][0]
     doc = MobileDocument(**document)
 
@@ -32,6 +32,14 @@ def test_mobile_document():
     assert doc.issuersigned
 
 def test_mobile_document_dump():
+    mdoc = MdocCborIssuer(PKEY)
+    mdoc.new(
+        data=MICOV_DATA,
+        devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1"
+    )
+
+
     document = mdoc.signed["documents"][0]
     doc = MobileDocument(**document)
 
@@ -41,6 +49,14 @@ def test_mobile_document_dump():
     assert len(dump) > 0
 
 def test_mobile_document_dumps():
+    mdoc = MdocCborIssuer(PKEY)
+    mdoc.new(
+        data=MICOV_DATA,
+        devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1"
+    )
+
+
     document = mdoc.signed["documents"][0]
     doc = MobileDocument(**document)
 
@@ -50,7 +66,14 @@ def test_mobile_document_dumps():
     assert len(dumps) > 0
 
 def test_mobile_document_verify():
+    mdoc = MdocCborIssuer(PKEY)
+    mdoc.new(
+        data=MICOV_DATA,
+        devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1"
+    )
+
     document = mdoc.signed["documents"][0]
     doc = MobileDocument(**document)
 
-    assert doc.verify() == True
+    assert doc.verify()
