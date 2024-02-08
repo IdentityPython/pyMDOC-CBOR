@@ -20,15 +20,27 @@ from pymdoccbor.tools import shuffle_dict
 
 class MsoIssuer(MsoX509Fabric):
     """
-
+    MsoIssuer helper class to create a new mso
     """
 
     def __init__(
         self,
         data: dict,
-        private_key: Union[dict, CoseKey],
+        private_key: Union[dict, EC2Key, CoseKey],
         digest_alg: str = settings.PYMDOC_HASHALG
     ):
+        """
+        Create a new MsoIssuer instance
+
+        :param data: the data to sign
+        :type data: dict
+        :param private_key: the private key to sign the mso
+        :type private_key: dict | CoseKey
+        :param digest_alg: the digest algorithm to use
+        :type digest_alg: str
+
+        :raises MsoPrivateKeyRequired: if no private key is provided
+        """
 
         if private_key and isinstance(private_key, dict):
             self.private_key = CoseKey.from_dict(private_key)
@@ -36,6 +48,10 @@ class MsoIssuer(MsoX509Fabric):
                 self.private_key.kid = str(uuid.uuid4())
         elif private_key and isinstance(private_key, CoseKey):
             self.private_key = private_key
+        elif private_key and isinstance(private_key, EC2Key):
+            ec2_encoded = private_key.encode()
+            ec2_decoded = CoseKey.decode(ec2_encoded)
+            self.private_key = ec2_decoded
         else:
             raise MsoPrivateKeyRequired(
                 "MSO Writer requires a valid private key"
@@ -90,17 +106,36 @@ class MsoIssuer(MsoX509Fabric):
 
                 digest_cnt += 1
 
-    def format_datetime_repr(self, dt: datetime.datetime):
+    def format_datetime_repr(self, dt: datetime.datetime) -> str:
+        """
+        Format a datetime object to a string representation
+
+        :param dt: the datetime object
+        :type dt: datetime.datetime
+
+        :return: the string representation
+        :rtype: str
+        """
         return dt.isoformat().split('.')[0] + 'Z'
 
     def sign(
         self,
         device_key: Union[dict, None] = None,
         valid_from: Union[None, datetime.datetime] = None,
-        doctype: str = None
+        doctype: str | None = None
     ) -> Sign1Message:
         """
-            sign a mso and returns it
+        Sign a mso and returns it
+
+        :param device_key: the device key info
+        :type device_key: dict | None
+        :param valid_from: the validity start date
+        :type valid_from: datetime.datetime | None
+        :param doctype: the document type
+        :type doctype: str
+
+        :return: the signed mso
+        :rtype: Sign1Message
         """
         utcnow = datetime.datetime.utcnow()
         if settings.PYMDOC_EXP_DELTA_HOURS:

@@ -6,25 +6,57 @@ from typing import List
 
 from pymdoccbor.exceptions import InvalidMdoc
 from pymdoccbor.mdoc.issuersigned import IssuerSigned
+from pymdoccbor.mdoc.exceptions import NoDocumentTypeProvided, NoSignedDocumentProvided
 
 logger = logging.getLogger('pymdoccbor')
 
 
 class MobileDocument:
+    """
+    MobileDocument helper class to verify a mdoc
+    """
+
     _states = {
         True: "valid",
         False: "failed",
     }
 
     def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}):
+        """
+        Create a new MobileDocument instance
+
+        :param docType: the document type
+        :type docType: str
+        :param issuerSigned: the issuer signed data
+        :type issuerSigned: dict
+        :param deviceSigned: the device signed data
+        :type deviceSigned: dict
+
+        :raises NoDocumentTypeProvided: if no document type is provided
+        :raises NoSignedDocumentProvided: if no signed document is provided
+        """
+
+        if not docType:
+            raise NoDocumentTypeProvided("You must provide a document type")
+        
+        if not issuerSigned:
+            raise NoSignedDocumentProvided("You must provide a signed document")
+        
         self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
-        self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
+        self.issuersigned: IssuerSigned = IssuerSigned(**issuerSigned)
         self.is_valid = False
 
         # TODO
         self.devicesigned: dict = deviceSigned
 
     def dump(self) -> dict:
+        """
+        Returns a dict representation of the document
+
+        :return: the document as dict
+        :rtype: dict
+        """
+
         return {
             'docType': self.doctype,
             'issuerSigned': self.issuersigned.dump()
@@ -32,23 +64,35 @@ class MobileDocument:
     
     def dumps(self) -> str:
         """
-            returns an AF binary repr of the document
+        Returns an AF binary repr of the document
+
+        :return: the document as AF binary
+        :rtype: str
         """
         return binascii.hexlify(self.dump())
     
     def dump(self) -> bytes:
         """
-            returns bytes
+        Returns a CBOR repr of the document
+
+        :return: the document as CBOR
+        :rtype: bytes
         """
         return cbor2.dumps(
             cbor2.CBORTag(24, value={
                 'docType': self.doctype,
                 'issuerSigned': self.issuersigned.dumps()
-            }
-            )
+            })
         )
 
     def verify(self) -> bool:
+        """
+        Verify the document signature
+
+        :return: True if valid, False otherwise
+        :rtype: bool
+        """
+
         self.is_valid = self.issuersigned.issuer_auth.verify_signature()
         return self.is_valid
 

@@ -5,8 +5,6 @@ import logging
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
 
-from typing import Optional
-
 from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
     UnsupportedMsoDataFormat
@@ -20,6 +18,8 @@ logger = logging.getLogger("pymdoccbor")
 
 class MsoVerifier:
     """
+    MsoVerifier helper class to verify a mso
+
     Parameters
         data: CBOR TAG 24
 
@@ -31,7 +31,15 @@ class MsoVerifier:
         structure as defined in RFC 8152.
     """
 
-    def __init__(self, data: cbor2.CBORTag):
+    def __init__(self, data: cbor2.CBORTag) -> None:
+        """
+        Create a new MsoParser instance
+        
+        :param data: the data to verify
+        :type data: cbor2.CBORTag
+        
+        :raises UnsupportedMsoDataFormat: if the data format is not supported
+        """
         self._data = data
         # not used
         if isinstance(self._data, bytes):
@@ -44,23 +52,35 @@ class MsoVerifier:
                 f"MsoParser only supports raw bytes and list, a {type(data)} was provided"
             )
 
-        self.object.key: Optional[CoseKey, None] = None
+        self.object.key: CoseKey | None = None
         self.public_key: cryptography.hazmat.backends.openssl.ec._EllipticCurvePublicKey = None
         self.x509_certificates: list = []
 
     @property
-    def payload_as_cbor(self):
+    def payload_as_cbor(self) -> dict:
         """
-        return the decoded payload
+        Return the decoded payload
+
+        :return: the decoded payload
+        :rtype: dict
         """
         return cbor2.loads(self.object.payload)
 
     @property
-    def payload_as_raw(self):
+    def payload_as_raw(self) -> bytes:
+        """
+        Return the raw payload
+
+        :return: the raw payload
+        :rtype: bytes
+        """
         return self.object.payload
 
     @property
-    def payload_as_dict(self):
+    def payload_as_dict(self) -> dict:
+        """
+        Return the payload as dict
+        """
         return cbor2.loads(
             cbor2.loads(self.object.payload).value
         )
@@ -68,8 +88,13 @@ class MsoVerifier:
     @property
     def raw_public_keys(self) -> bytes:
         """
-            it returns the public key extract from x509 certificates
-            looking to both phdr and uhdr
+        It returns the public key extract from x509 certificates
+        looking to both phdr and uhdr
+
+        :raises MsoX509ChainNotFound: if no valid x509 certificate is found
+        
+        :return: the raw public key
+        :rtype: bytes
         """
         _mixed_heads = self.object.phdr.items() | self.object.uhdr.items()
         for h, v in _mixed_heads:
@@ -81,7 +106,7 @@ class MsoVerifier:
             "in this MSO."
         )
 
-    def attest_public_key(self):
+    def attest_public_key(self) -> None:
         logger.warning(
             "TODO: in next releases. "
             "The certificate is to be considered as untrusted, this release "
@@ -89,7 +114,10 @@ class MsoVerifier:
             "python certvalidator or cryptography for that."
         )
 
-    def load_public_key(self):
+    def load_public_key(self) -> None:
+        """
+        Load the public key from the x509 certificate
+        """
 
         self.attest_public_key()
 
@@ -109,7 +137,12 @@ class MsoVerifier:
         self.object.key = key
 
     def verify_signature(self) -> bool:
+        """
+        Verify the signature
 
+        :return: True if valid, False otherwise
+        :rtype: bool
+        """
         if not self.object.key:
             self.load_public_key()
 
