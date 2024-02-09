@@ -2,7 +2,7 @@ import cbor2
 import cryptography
 import logging
 
-from pycose.keys import CoseKey, EC2Key
+from pycose.keys import EC2Key
 from pycose.messages import Sign1Message
 
 from pymdoccbor.exceptions import (
@@ -52,7 +52,7 @@ class MsoVerifier:
                 f"MsoParser only supports raw bytes and list, a {type(data)} was provided"
             )
 
-        self.object.key: CoseKey | None = None
+        self.object.key = None
         self.public_key: cryptography.hazmat.backends.openssl.ec._EllipticCurvePublicKey = None
         self.x509_certificates: list = []
 
@@ -130,9 +130,8 @@ class MsoVerifier:
 
         key = EC2Key(
             crv=settings.COSEKEY_HAZMAT_CRV_MAP[self.public_key.curve.name],
-            x=self.public_key.public_numbers().x.to_bytes(
-                settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'
-            )
+            x=self.public_key.public_numbers().x.to_bytes(settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'),
+            y=self.public_key.public_numbers().y.to_bytes(settings.CRV_LEN_MAP[self.public_key.curve.name], 'big')
         )
         self.object.key = key
 
