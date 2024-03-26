@@ -2,11 +2,13 @@ import datetime
 import os
 
 COSEKEY_HAZMAT_CRV_MAP = {
-    "secp256r1": "P_256"
+    "secp256r1": "P_256",
+    "secp384r1": "P_384"
 }
 
 CRV_LEN_MAP = {
     "secp256r1": 32,
+    "secp384r1": 48,
 }
 
 PYMDOC_HASHALG: str = os.getenv('PYMDOC_HASHALG', "SHA-256")
