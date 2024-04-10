@@ -10,6 +10,7 @@ COSEKEY_HAZMAT_CRV_MAP = {
 CRV_LEN_MAP = {
     "secp256r1": 32,
     "secp384r1": 48,
+    "secp521r1": 66
 }
 
 PYMDOC_HASHALG: str = os.getenv('PYMDOC_HASHALG', "SHA-256")
