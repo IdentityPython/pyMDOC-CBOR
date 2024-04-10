@@ -3,7 +3,8 @@ import os
 
 COSEKEY_HAZMAT_CRV_MAP = {
     "secp256r1": "P_256",
-    "secp384r1": "P_384"
+    "secp384r1": "P_384",
+    "secp521r1":  "P_521"
 }
 
 CRV_LEN_MAP = {
