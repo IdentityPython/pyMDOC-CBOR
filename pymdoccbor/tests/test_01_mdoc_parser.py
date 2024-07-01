@@ -23,7 +23,7 @@ def test_parse_mdoc_af_binary():
 
     # testing from export re-import
     mdoc2 = MdocCbor()
-    mdoc2.load(mdoc.data_as_bytes)
+    mdoc2.loads(mdoc.data_as_bytes)
     mdoc2.verify()
 
     for i in mdoc.documents:
