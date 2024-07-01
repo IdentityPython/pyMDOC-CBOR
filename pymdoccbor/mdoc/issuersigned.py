@@ -2,13 +2,10 @@ import cbor2
 from typing import Union
 
 from pymdoccbor.mso.verifier import MsoVerifier
-from pymdoccbor.mdoc.exceptions import MissingIssuerAuth
 
 
 class IssuerSigned:
     """
-    IssuerSigned helper class to handle issuer signed data
-
     nameSpaces provides the definition within which the data elements of
         the document are defined.
         A document may have multiple nameSpaces.
@@ -25,43 +22,19 @@ class IssuerSigned:
     ]
     """
 
-    def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]) -> None:
-        """
-        Create a new IssuerSigned instance
-
-        :param nameSpaces: the namespaces
-        :type nameSpaces: dict
-        :param issuerAuth: the issuer auth
-        :type issuerAuth: dict | bytes
-
-        :raises MissingIssuerAuth: if no issuer auth is provided
-        """
+    def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]):
         self.namespaces: dict = nameSpaces
 
-        if not issuerAuth:
-            raise MissingIssuerAuth("issuerAuth must be provided")
-
+        #  if isinstance(ia, dict):
         self.issuer_auth = MsoVerifier(issuerAuth)
 
     def dump(self) -> dict:
-        """
-        Returns a dict representation of the issuer signed data
-
-        :return: the issuer signed data as dict
-        :rtype: dict
-        """
         return {
             'nameSpaces': self.namespaces,
             'issuerAuth': self.issuer_auth
         }
 
-    def dumps(self) -> bytes:
-        """
-        Returns a CBOR representation of the issuer signed data
-
-        :return: the issuer signed data as CBOR
-        :rtype: bytes
-        """
+    def dumps(self) -> dict:
         return cbor2.dumps(
             {
                 'nameSpaces': self.namespaces,

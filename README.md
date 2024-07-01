@@ -28,16 +28,45 @@ according to ISO 18013-5.
 ## Setup
 
 ````
-pip install pymdoccbor
+pip install pymdlmdoc
 ````
 
 or
 
 ````
-pip install git+https://github.com/peppelinux/pyMDOC-CBOR.git
+pip install git+https://github.com/devisefutures/pyMDOC-CBOR.git@cert_arg
 ````
 
 ## Usage
+
+### Issue an MDOC CBOR signed with HSM key
+
+````
+PID_DATA = {
+        "eu.europa.ec.eudiw.pid.1": {
+            "family_name": "Raffaello",
+            "given_name": "Mascetti",
+            "birth_date": "1922-03-13"
+        }
+    }
+
+mdoci = MdocCborIssuer(
+    alg = 'ES256',
+    kid = "demo-kid",
+    hsm=True,
+    key_label="p256-1",
+    user_pin="1234",
+    lib_path="/etc/utimaco/libcs2_pkcs11.so",
+    slot_id=3
+)
+
+mdoc = mdoci.new(
+    doctype="eu.europa.ec.eudiw.pid.1",
+    data=PID_DATA,
+    cert_path="app/keys/IACAmDLRoot01.der" # DS certificate 
+)
+
+````
 
 ### Issue an MDOC CBOR
 
@@ -45,8 +74,6 @@ pip install git+https://github.com/peppelinux/pyMDOC-CBOR.git
 The method `.new()` gets the user attributes, devicekeyinfo and doctype.
 
 ````
-import os
-
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 
 PKEY = {
@@ -58,17 +85,12 @@ PKEY = {
 }
 
 PID_DATA = {
-    "eu.europa.ec.eudiw.pid.1": {
-        "family_name": "Raffaello",
-        "given_name": "Mascetti",
-        "birth_date": "1922-03-13",
-        "birth_place": "Rome",
-        "birth_country": "IT"
-    },
-    "eu.europa.ec.eudiw.pid.it.1": {
-        "tax_id_code": "TINIT-XXXXXXXXXXXXXXX"
+        "eu.europa.ec.eudiw.pid.1": {
+            "family_name": "Raffaello",
+            "given_name": "Mascetti",
+            "birth_date": "1922-03-13"
+        }
     }
-}
 
 mdoci = MdocCborIssuer(
     private_key=PKEY
@@ -78,16 +100,20 @@ mdoc = mdoci.new(
     doctype="eu.europa.ec.eudiw.pid.1",
     data=PID_DATA,
     devicekeyinfo=PKEY  # TODO
+    cert_path="/path/"
 )
 
 mdoc
 >> returns a python dictionay
 
+mdoc.dump()
+>> returns mdoc MSO bytes
+
 mdoci.dump()
 >> returns mdoc bytes
 
 mdoci.dumps()
->> returns AF Binary string representation
+>> returns AF Binary mdoc string representation
 ````
 
 ### Issue an MSO alone
@@ -213,8 +239,6 @@ Other examples at [cbor official documentation](https://github.com/agronholm/cbo
 #### CBOR Diagnostic representation
 
 - [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py)
-- [Authlete's CBOR diagnostic tools](https://nextdev-api.authlete.net/api/cbor)
-- [Auth0 CBOR diagnostic tool](https://www.mdl.me/)
 
 #### X.509 certificates and chains
 
