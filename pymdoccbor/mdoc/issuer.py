@@ -62,6 +62,7 @@ class MdocCborIssuer:
         validity: dict = None,
         devicekeyinfo: Union[dict, CoseKey, str] = None,
         cert_path: str = None,
+        revocation: dict = None,
     ):
         """
         create a new mdoc with signed mso
@@ -118,6 +119,7 @@ class MdocCborIssuer:
                 alg=self.alg,
                 kid=self.kid,
                 validity=validity,
+                revocation=revocation,
             )
 
         else:
@@ -127,6 +129,7 @@ class MdocCborIssuer:
                 alg=self.alg,
                 cert_path=cert_path,
                 validity=validity,
+                revocation=revocation,
             )
 
         mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo)
