@@ -44,6 +44,7 @@ class MsoIssuer(MsoX509Fabric):
         self,
         data: dict,
         validity: str,
+        revocation: str = None,
         cert_path: str = None,
         key_label: str = None,
         user_pin: str = None,
@@ -78,6 +79,7 @@ class MsoIssuer(MsoX509Fabric):
         self.alg = alg
         self.kid = kid
         self.validity = validity
+        self.revocation = revocation
 
         alg_map = {"ES256": "sha256", "ES384": "sha384", "ES512": "sha512"}
 
@@ -166,6 +168,9 @@ class MsoIssuer(MsoX509Fabric):
             },
             "digestAlgorithm": alg_map.get(self.alg),
         }
+
+        if self.revocation is not None:
+            payload.update({"status": {"StatusListInfo": self.revocation}})
 
         if self.cert_path:
             # Load the DER certificate file
