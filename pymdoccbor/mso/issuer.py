@@ -98,7 +98,12 @@ class MsoIssuer(MsoX509Fabric):
                     v = cbor2.CBORTag(_value_cbortag, value=v)
                     # print("\n-----\n K,V ", k, "\n", v)
 
-                if k == "driving_privileges":
+                if (
+                    k == "driving_privileges"
+                    or k == "places_of_work"
+                    or k == "legislation"
+                    or k == "employment_details"
+                ):
                     for item in v:
                         for k2, v2 in item.items():
                             _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k2, None)
