@@ -170,7 +170,7 @@ class MsoIssuer(MsoX509Fabric):
         }
 
         if self.revocation is not None:
-            payload.update({"status": {"StatusListInfo": self.revocation}})
+            payload.update({"status": self.revocation})
 
         if self.cert_path:
             # Load the DER certificate file
