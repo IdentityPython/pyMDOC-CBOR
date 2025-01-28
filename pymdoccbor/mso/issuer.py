@@ -98,12 +98,13 @@ class MsoIssuer(MsoX509Fabric):
                     v = cbor2.CBORTag(_value_cbortag, value=v)
                     # print("\n-----\n K,V ", k, "\n", v)
 
-                if (
-                    k == "driving_privileges"
-                    or k == "places_of_work"
-                    or k == "legislation"
-                    or k == "employment_details"
-                ):
+                if isinstance(v, dict):
+                    for k2, v2 in v.items():
+                        _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k2, None)
+                        if _value_cbortag:
+                            v[k2] = cbor2.CBORTag(_value_cbortag, value=v2)
+
+                if isinstance(v, list):
                     for item in v:
                         for k2, v2 in item.items():
                             _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k2, None)
