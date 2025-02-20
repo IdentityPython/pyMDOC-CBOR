@@ -104,7 +104,7 @@ class MsoIssuer(MsoX509Fabric):
                         if _value_cbortag:
                             v[k2] = cbor2.CBORTag(_value_cbortag, value=v2)
 
-                if isinstance(v, list):
+                if isinstance(v, list) and k != "nationality":
                     for item in v:
                         for k2, v2 in item.items():
                             _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k2, None)
