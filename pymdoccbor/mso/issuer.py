@@ -98,7 +98,13 @@ class MsoIssuer(MsoX509Fabric):
                     v = cbor2.CBORTag(_value_cbortag, value=v)
                     # print("\n-----\n K,V ", k, "\n", v)
 
-                if k == "driving_privileges":
+                if isinstance(v, dict):
+                    for k2, v2 in v.items():
+                        _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k2, None)
+                        if _value_cbortag:
+                            v[k2] = cbor2.CBORTag(_value_cbortag, value=v2)
+
+                if isinstance(v, list) and k != "nationality":
                     for item in v:
                         for k2, v2 in item.items():
                             _value_cbortag = settings.CBORTAGS_ATTR_MAP.get(k2, None)
@@ -170,7 +176,7 @@ class MsoIssuer(MsoX509Fabric):
         }
 
         if self.revocation is not None:
-            payload.update({"status": {"StatusListInfo": self.revocation}})
+            payload.update({"status": self.revocation})
 
         if self.cert_path:
             # Load the DER certificate file
