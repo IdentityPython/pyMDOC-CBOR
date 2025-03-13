@@ -1,6 +1,5 @@
 import cbor2
 import os
-
 from pycose.messages import Sign1Message
 
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
@@ -21,10 +20,20 @@ PKEY = {
 def test_mso_writer():
     msoi = MsoIssuer(
         data=PID_DATA,
-        private_key=PKEY
+        private_key=PKEY,
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
+        alg="ES256"
     )
 
-    # TODO: assertion here about msow.hash_map and msow.disclosure_map
+    assert "eu.europa.ec.eudiw.pid.1" in msoi.hash_map
+    assert msoi.hash_map["eu.europa.ec.eudiw.pid.1"]
+
+    assert "eu.europa.ec.eudiw.pid.1" in msoi.disclosure_map
+    assert msoi.disclosure_map["eu.europa.ec.eudiw.pid.1"]
+    assert msoi.disclosure_map["eu.europa.ec.eudiw.pid.1"].values().__len__() == PID_DATA["eu.europa.ec.eudiw.pid.1"].values().__len__()
 
     mso = msoi.sign()
 
@@ -36,13 +45,18 @@ def test_mso_writer():
 
 def test_mdoc_issuer():
     mdoci = MdocCborIssuer(
-        private_key=PKEY
+        private_key=PKEY,
+        alg="ES256",
     )
 
     mdoc = mdoci.new(
         doctype="eu.europa.ec.eudiw.pid.1",
         data=PID_DATA,
-        devicekeyinfo=PKEY  # TODO
+        #devicekeyinfo=PKEY,  TODO
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
     )
 
     mdocp = MdocCbor()
