@@ -143,23 +143,19 @@ class MdocCborIssuer:
             slot_id=self.slot_id,
         )
 
-        # TODO: for now just a single document, it would be trivial having
-        # also multiple but for now I don't have use cases for this
         res = {
-            # "version": self.version,
-            # "documents": [
-            # {
-            # "docType": doctype,  # 'org.iso.18013.5.1.mDL'
-            # "issuerSigned": {
-            "nameSpaces": {
-                ns: [v for k, v in dgst.items()]
-                for ns, dgst in msoi.disclosure_map.items()
-            },
-            "issuerAuth": cbor2.decoder.loads(mso_cbor),
-            # },
-            # }
-            # ],
-            # "status": self.status,
+            "version": self.version,
+            "documents": [{
+                "docType": doctype,  # 'org.iso.18013.5.1.mDL'
+                "issuerSigned": {
+                    "nameSpaces": {
+                        ns: [v for k, v in dgst.items()]
+                        for ns, dgst in msoi.disclosure_map.items()
+                    },
+                    "issuerAuth": cbor2.decoder.loads(mso_cbor),
+                },
+            }],
+            "status": self.status,
         }
 
         # print("mso diganostic notation: \n", cbor2diag(mso_cbor))
