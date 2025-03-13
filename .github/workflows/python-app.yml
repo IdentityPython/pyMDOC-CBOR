@@ -30,7 +30,7 @@ jobs:
     - name: Install system package
       run: |
         sudo apt update
-        sudo apt install python3-dev libssl-dev make automake gcc g++
+        sudo apt install python3-dev libssl-dev make automake gcc g++ libssl-dev
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
