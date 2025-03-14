@@ -69,7 +69,7 @@ class MdocCborIssuer:
         """
         if isinstance(devicekeyinfo, dict):
             devicekeyinfo = CoseKey.from_dict(devicekeyinfo)
-        if isinstance(devicekeyinfo, str):
+        elif isinstance(devicekeyinfo, str):
             device_key_bytes = base64.urlsafe_b64decode(devicekeyinfo.encode("utf-8"))
             public_key = serialization.load_pem_public_key(device_key_bytes)
             curve_name = public_key.curve.name
