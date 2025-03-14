@@ -57,12 +57,15 @@ class MsoIssuer(MsoX509Fabric):
         digest_alg: str = settings.PYMDOC_HASHALG,
     ):
         if not hsm:
-            if private_key and isinstance(private_key, dict):
-                self.private_key = CoseKey.from_dict(private_key)
-                if not self.private_key.kid:
-                    self.private_key.kid = str(uuid.uuid4())
-            elif private_key and isinstance(private_key, CoseKey):
-                self.private_key = private_key
+            if private_key:
+                if isinstance(private_key, dict):
+                    self.private_key = CoseKey.from_dict(private_key)
+                    if not self.private_key.kid:
+                        self.private_key.kid = str(uuid.uuid4())
+                elif isinstance(private_key, CoseKey):
+                    self.private_key = private_key
+                else:
+                    raise ValueError("private_key must be a dict or CoseKey object")
             else:
                 raise MsoPrivateKeyRequired("MSO Writer requires a valid private key")
 
