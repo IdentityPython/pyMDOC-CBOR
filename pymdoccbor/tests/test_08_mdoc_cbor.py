@@ -3,14 +3,7 @@ import cbor2
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.mdoc.verifier import MdocCbor
-
-PKEY = {
-    'KTY': 'EC2',
-    'CURVE': 'P_256',
-    'ALG': 'ES256',
-    'D': os.urandom(32),
-    'KID': b"demo-kid"
-}
+from pymdoccbor.tests.pkey import PKEY
 
 def test_mdoc_cbor_creation():
     mdoci = MdocCborIssuer(
