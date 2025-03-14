@@ -11,63 +11,97 @@ logger = logging.getLogger('pymdoccbor')
 
 
 class MobileDocument:
+    """
+    MobileDocument class to handle the Mobile Document
+    """
+
     _states = {
         True: "valid",
         False: "failed",
     }
 
-    def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}):
+    def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}) -> None:
+        """
+        Initialize the MobileDocument object
+
+        :param docType: str: the document type
+        :param issuerSigned: dict: the issuerSigned info
+        :param deviceSigned: dict: the deviceSigned info
+        """
+
         self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
         self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
         self.is_valid = False
-
-        # TODO
         self.devicesigned: dict = deviceSigned
 
     def dump(self) -> dict:
+        """
+        It returns the document as a dict
+
+        :return: dict: the document as a dict
+        """
         return {
             'docType': self.doctype,
             'issuerSigned': self.issuersigned.dump()
         }
     
-    def dumps(self) -> str:
+    def dumps(self) -> bytes:
         """
-            returns an AF binary repr of the document
+        It returns the AF binary repr as bytes
+
+        :return: bytes: the document as bytes
         """
         return binascii.hexlify(self.dump())
     
     def dump(self) -> bytes:
         """
-            returns bytes
+        It returns the document as bytes
+
+        :return: dict: the document as bytes
         """
         return cbor2.dumps(
-            cbor2.CBORTag(24, value={
-                'docType': self.doctype,
-                'issuerSigned': self.issuersigned.dumps()
-            }
+            cbor2.CBORTag(
+                24, 
+                value={
+                    'docType': self.doctype,
+                    'issuerSigned': self.issuersigned.dumps()
+                }
             )
         )
 
     def verify(self) -> bool:
+        """
+        Verify the document signature
+
+        :return: bool: True if the signature is valid, False otherwise
+        """
         self.is_valid = self.issuersigned.issuer_auth.verify_signature()
         return self.is_valid
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__module__}.{self.__class__.__name__} [{self._states[self.is_valid]}]"
 
 
 class MdocCbor:
+    """
+    MdocCbor class to handle the Mobile Document
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Initialize the MdocCbor object
+        """
         self.data_as_bytes: bytes = b""
         self.data_as_cbor_dict: dict = {}
 
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
 
-    def loads(self, data: str):
+    def loads(self, data: str) -> None:
         """
-        data is a AF BINARY
+        Load the data from a AF Binary string
+
+        :param data: str: the AF binary string
         """
         if isinstance(data, bytes):
             data = binascii.hexlify(data)
@@ -77,13 +111,15 @@ class MdocCbor:
 
     def dump(self) -> bytes:
         """
-            returns bytes
+        Returns the CBOR representation of the mdoc as bytes
         """
         return self.data_as_bytes
 
-    def dumps(self) -> str:
+    def dumps(self) -> bytes:
         """
-            returns AF binary string representation
+        Returns the AF binary representation of the mdoc as bytes
+
+        :return: bytes: the AF binary representation of the mdoc
         """
         return binascii.hexlify(self.data_as_bytes)
 
@@ -92,6 +128,12 @@ class MdocCbor:
         return self.dumps().decode()
 
     def verify(self) -> bool:
+        """"
+        Verify signatures of all documents contained in the mdoc
+
+        :return: bool: True if all signatures are valid, False otherwise
+        """
+
         cdict = self.data_as_cbor_dict
 
         for i in ('version', 'documents'):
@@ -121,7 +163,7 @@ class MdocCbor:
 
         return False if self.documents_invalid else True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"{self.__module__}.{self.__class__.__name__} "
             f"[{len(self.documents)} valid documents]"

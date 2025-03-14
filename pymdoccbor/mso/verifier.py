@@ -5,7 +5,7 @@ import logging
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
 
-from typing import Optional
+from typing import Union
 
 from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
@@ -31,8 +31,15 @@ class MsoVerifier:
         structure as defined in RFC 8152.
     """
 
-    def __init__(self, data: cbor2.CBORTag):
+    def __init__(self, data: Union[cbor2.CBORTag, bytes, list]) -> None:
+        """
+        Initialize the MsoParser object
+
+        :param data: Union[cbor2.CBORTag, bytes, list]: the data to parse
+        """
+
         self._data = data
+
         # not used
         if isinstance(self._data, bytes):
             self.object: Sign1Message = bytes2CoseSign1(
@@ -44,14 +51,16 @@ class MsoVerifier:
                 f"MsoParser only supports raw bytes and list, a {type(data)} was provided"
             )
 
-        self.object.key: Optional[CoseKey, None] = None
+        self.object.key = None
         self.public_key: cryptography.hazmat.backends.openssl.ec._EllipticCurvePublicKey = None
         self.x509_certificates: list = []
 
     @property
-    def payload_as_cbor(self):
+    def payload_as_cbor(self) -> dict:
         """
-        return the decoded payload
+        It returns the payload as a CBOR TAG
+
+        :return: dict: the payload as a CBOR TAG 24
         """
         return cbor2.loads(self.object.payload)
 
@@ -89,8 +98,12 @@ class MsoVerifier:
             "python certvalidator or cryptography for that."
         )
 
-    def load_public_key(self):
+    def load_public_key(self) -> None:
+        """
+        Load the public key from the x509 certificate
 
+        :return: None
+        """
         self.attest_public_key()
 
         for i in self.raw_public_keys:
@@ -109,7 +122,11 @@ class MsoVerifier:
         self.object.key = key
 
     def verify_signature(self) -> bool:
+        """"
+        Verify the signature of the MSO
 
+        :return: bool: True if the signature is valid, False otherwise
+        """
         if not self.object.key:
             self.load_public_key()
 

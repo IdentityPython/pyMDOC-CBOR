@@ -1,18 +1,3 @@
-# Modifications have been made to the original file (available at https://github.com/IdentityPython/pyMDOC-CBOR)
-# All modifications Copyright (c) 2023 European Commission
-
-# All modifications licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import cbor2
 import datetime
 import hashlib
@@ -38,12 +23,14 @@ from cbor_diag import *
 
 
 class MsoIssuer(MsoX509Fabric):
-    """ """
+    """
+    MsoIssuer helper class to create a new mso
+    """
 
     def __init__(
         self,
         data: dict,
-        validity: str,
+        validity: dict,
         revocation: str = None,
         cert_path: str = None,
         key_label: str = None,
@@ -55,7 +42,25 @@ class MsoIssuer(MsoX509Fabric):
         hsm: bool = False,
         private_key: Union[dict, CoseKey] = None,
         digest_alg: str = settings.PYMDOC_HASHALG,
-    ):
+    ) -> None:
+        """
+        Initialize a new MsoIssuer
+
+        :param data: dict: the data to sign
+        :param validity: validity: the validity info of the mso
+        :param revocation: str: the revocation status
+        :param cert_path: str: the path to the certificate
+        :param key_label: str: key label
+        :param user_pin: str: user pin
+        :param lib_path: str: path to the library cryptographic library
+        :param slot_id: int: slot id
+        :param kid: str: key id
+        :param alg: str: hashig algorithm
+        :param hsm: bool: hardware security module
+        :param private_key: Union[dict, CoseKey]: the signing key
+        :param digest_alg: str: the digest algorithm
+        """
+
         if not hsm:
             if private_key:
                 if isinstance(private_key, dict):
@@ -133,7 +138,13 @@ class MsoIssuer(MsoX509Fabric):
 
                 digest_cnt += 1
 
-    def format_datetime_repr(self, dt: datetime.datetime):
+    def format_datetime_repr(self, dt: datetime.datetime) -> str:
+        """
+        Format a datetime object to a string
+
+        :param dt: datetime.datetime: the datetime object
+        :return: str: the formatted string
+        """
         return dt.isoformat().split(".")[0] + "Z"
 
     def sign(
@@ -143,7 +154,13 @@ class MsoIssuer(MsoX509Fabric):
         doctype: str = None,
     ) -> Sign1Message:
         """
-        sign a mso and returns itprivate_key
+        Sign a mso and returns itprivate_key
+
+        :param device_key: Union[dict, None]: the device key
+        :param valid_from: Union[None, datetime.datetime]: the valid from date
+        :param doctype: str: the document type
+
+        :return: Sign1Message: the signed mso
         """
         utcnow = datetime.datetime.utcnow()
         valid_from = datetime.datetime.strptime(
