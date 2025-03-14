@@ -88,7 +88,9 @@ PID_DATA = {
         "eu.europa.ec.eudiw.pid.1": {
             "family_name": "Raffaello",
             "given_name": "Mascetti",
-            "birth_date": "1922-03-13"
+            "birth_date": "1922-03-13",
+	        "birth_place": "Rome",
+            "birth_country": "IT"
         }
     }
 
