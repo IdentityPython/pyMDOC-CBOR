@@ -29,7 +29,14 @@ class MobileDocument:
         :param deviceSigned: dict: the deviceSigned info
         """
 
+        if not docType:
+            raise ValueError("You must provide a document type")
+
         self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
+
+        if not issuerSigned:
+            raise ValueError("You must provide a signed document")
+
         self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
         self.is_valid = False
         self.devicesigned: dict = deviceSigned

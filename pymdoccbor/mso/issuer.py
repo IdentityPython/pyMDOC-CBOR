@@ -73,6 +73,12 @@ class MsoIssuer(MsoX509Fabric):
                     raise ValueError("private_key must be a dict or CoseKey object")
             else:
                 raise MsoPrivateKeyRequired("MSO Writer requires a valid private key")
+            
+        if not validity:
+            raise ValueError("validity must be present")
+        
+        if not alg:
+            raise ValueError("alg must be present")
 
         self.data: dict = data
         self.hash_map: dict = {}

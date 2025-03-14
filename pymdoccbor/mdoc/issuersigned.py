@@ -3,7 +3,6 @@ from typing import Union
 
 from pymdoccbor.mso.verifier import MsoVerifier
 
-
 class IssuerSigned:
     """
     nameSpaces provides the definition within which the data elements of
@@ -22,7 +21,7 @@ class IssuerSigned:
     ]
     """
 
-    def __init__(self, nameSpaces: dict, issuerAuth: Union[dict, bytes]) -> None:
+    def __init__(self, nameSpaces: dict, issuerAuth: Union[cbor2.CBORTag, dict, bytes]) -> None:
         """
         Initialize the IssuerSigned object
 
@@ -31,6 +30,9 @@ class IssuerSigned:
         """
 
         self.namespaces: dict = nameSpaces
+
+        if not issuerAuth:
+            raise ValueError("issuerAuth must be provided")
 
         #  if isinstance(ia, dict):
         self.issuer_auth = MsoVerifier(issuerAuth)
