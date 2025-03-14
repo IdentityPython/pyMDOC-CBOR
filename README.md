@@ -34,7 +34,7 @@ pip install pymdoccbor
 or
 
 ````
-pip install git+https://github.com/devisefutures/pyMDOC-CBOR.git@cert_arg
+pip install git+https://github.com/peppelinux/pyMDOC-CBOR.git
 ````
 
 ## Usage
