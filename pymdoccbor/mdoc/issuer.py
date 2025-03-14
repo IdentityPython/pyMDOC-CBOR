@@ -43,8 +43,14 @@ class MdocCborIssuer:
     ):
         self.version: str = "1.0"
         self.status: int = 0
-        if private_key and isinstance(private_key, dict):
-            self.private_key = CoseKey.from_dict(private_key)
+
+        if private_key:
+            if isinstance(private_key, dict):
+                self.private_key = CoseKey.from_dict(private_key)
+            elif isinstance(private_key, CoseKey):
+                self.private_key = private_key
+            else:
+                raise ValueError("private_key must be a dict or CoseKey object")
 
         self.signed: dict = {}
         self.key_label = key_label
@@ -69,7 +75,7 @@ class MdocCborIssuer:
         """
         if isinstance(devicekeyinfo, dict):
             devicekeyinfo = CoseKey.from_dict(devicekeyinfo)
-        elif isinstance(devicekeyinfo, str):
+        if isinstance(devicekeyinfo, str):
             device_key_bytes = base64.urlsafe_b64decode(devicekeyinfo.encode("utf-8"))
             public_key = serialization.load_pem_public_key(device_key_bytes)
             curve_name = public_key.curve.name
