@@ -6,6 +6,7 @@ from typing import List
 
 from pymdoccbor.exceptions import InvalidMdoc
 from pymdoccbor.mdoc.issuersigned import IssuerSigned
+from pymdoccbor.mdoc.exceptions import NoDocumentTypeProvided, NoSignedDocumentProvided
 
 logger = logging.getLogger('pymdoccbor')
 
@@ -30,12 +31,12 @@ class MobileDocument:
         """
 
         if not docType:
-            raise ValueError("You must provide a document type")
+            raise NoDocumentTypeProvided("You must provide a document type")
 
         self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
 
         if not issuerSigned:
-            raise ValueError("You must provide a signed document")
+            raise NoSignedDocumentProvided("You must provide a signed document")
 
         self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
         self.is_valid = False
