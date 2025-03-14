@@ -30,8 +30,8 @@ setup(
     author='Giuseppe De Marco',
     author_email='demarcog83@gmail.com',
     license='Apache Software License',
-    packages=find_packages(include=["pymdoccbor", "pymdoccbor.*"]),  # ✅ Detect all subpackages
-    include_package_data=True,  # ✅ Include data files
+    packages=find_packages(include=["pymdoccbor", "pymdoccbor.*"]),
+    include_package_data=True,
     install_requires=[
         'cbor2>=5.4.0,<5.5.0',
         'cwt>=2.3.0,<2.4',

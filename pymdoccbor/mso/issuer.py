@@ -137,7 +137,7 @@ class MsoIssuer(MsoX509Fabric):
         :return: the signed mso
         :rtype: Sign1Message
         """
-        utcnow = datetime.datetime.utcnow()
+        utcnow = datetime.datetime.now(datetime.UTC)
         if settings.PYMDOC_EXP_DELTA_HOURS:
             exp = utcnow + datetime.timedelta(
                 hours=settings.PYMDOC_EXP_DELTA_HOURS

@@ -34,11 +34,11 @@ X509_LOCALITY_NAME          = os.getenv('X509_LOCALITY_NAME', u"San Francisco")
 X509_ORGANIZATION_NAME      = os.getenv('X509_ORGANIZATION_NAME', u"My Company")
 X509_COMMON_NAME            = os.getenv('X509_COMMON_NAME', u"mysite.com")
 
-X509_NOT_VALID_BEFORE       = os.getenv('X509_NOT_VALID_BEFORE', datetime.datetime.utcnow())
+X509_NOT_VALID_BEFORE       = os.getenv('X509_NOT_VALID_BEFORE', datetime.datetime.now(datetime.UTC))
 X509_NOT_VALID_AFTER_DAYS   = os.getenv('X509_NOT_VALID_AFTER_DAYS', 10)
 X509_NOT_VALID_AFTER        = os.getenv(
     'X509_NOT_VALID_AFTER', 
-    datetime.datetime.utcnow() + datetime.timedelta(
+    datetime.datetime.now(datetime.UTC) + datetime.timedelta(
         days=X509_NOT_VALID_AFTER_DAYS
     )
 )
