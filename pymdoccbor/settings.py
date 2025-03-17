@@ -1,6 +1,8 @@
 import datetime
 import os
 
+from datetime import timezone
+
 COSEKEY_HAZMAT_CRV_MAP = {
     "secp256r1": "P_256",
     "secp384r1": "P_384",
@@ -34,11 +36,11 @@ X509_LOCALITY_NAME          = os.getenv('X509_LOCALITY_NAME', u"San Francisco")
 X509_ORGANIZATION_NAME      = os.getenv('X509_ORGANIZATION_NAME', u"My Company")
 X509_COMMON_NAME            = os.getenv('X509_COMMON_NAME', u"mysite.com")
 
-X509_NOT_VALID_BEFORE       = os.getenv('X509_NOT_VALID_BEFORE', datetime.datetime.now(datetime.UTC))
+X509_NOT_VALID_BEFORE       = os.getenv('X509_NOT_VALID_BEFORE', datetime.datetime.now(timezone.utc))
 X509_NOT_VALID_AFTER_DAYS   = os.getenv('X509_NOT_VALID_AFTER_DAYS', 10)
 X509_NOT_VALID_AFTER        = os.getenv(
     'X509_NOT_VALID_AFTER', 
-    datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+    datetime.datetime.now(timezone.utc) + datetime.timedelta(
         days=X509_NOT_VALID_AFTER_DAYS
     )
 )

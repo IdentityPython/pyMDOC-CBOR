@@ -4,6 +4,8 @@ import hashlib
 import secrets
 import uuid
 
+from datetime import timezone
+
 from pycose.headers import Algorithm, KID
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
@@ -137,7 +139,7 @@ class MsoIssuer(MsoX509Fabric):
         :return: the signed mso
         :rtype: Sign1Message
         """
-        utcnow = datetime.datetime.now(datetime.UTC)
+        utcnow = datetime.datetime.now(timezone.utc)
         if settings.PYMDOC_EXP_DELTA_HOURS:
             exp = utcnow + datetime.timedelta(
                 hours=settings.PYMDOC_EXP_DELTA_HOURS
