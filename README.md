@@ -256,3 +256,4 @@ Other examples at [cbor official documentation](https://github.com/agronholm/cbo
 ## Authors and contributors
 
 - Giuseppe De Marco
+- Pasquale De Rose
