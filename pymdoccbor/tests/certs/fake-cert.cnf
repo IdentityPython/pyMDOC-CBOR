@@ -1,0 +1,31 @@
+[ req ]
+distinguished_name	= req_distinguished_name
+attributes		= req_attributes
+
+# Stop confirmation prompts. All information is contained below.
+prompt=                 no
+
+
+# The extensions to add to a certificate request - see [ v3_req ]
+req_extensions		= v3_req
+
+[ req_distinguished_name ]
+# Describe the Subject (ie the origanisation).
+# The first 6 below could be shortened to: C ST L O OU CN
+# The short names are what are shown when the certificate is displayed.
+# Eg the details below would be shown as:
+#    Subject: C=UK, ST=Hertfordshire, L=My Town, O=Some Organisation, OU=Some Department, CN=www.example.com/emailAddress=bofh@example.com
+
+countryName=		    BE
+stateOrProvinceName=	Brussels Region
+localityName=		    Brussels
+organizationName=	    Test
+organizationalUnitName=	Test-Unit
+commonName=		        Test ASL Issuer
+emailAddress=		    fake@fake.com
+
+[ req_attributes ]
+# None. Could put Challenge Passwords, don't want them, leave empty
+
+[ v3_req ]
+# None.
