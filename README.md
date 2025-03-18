@@ -63,7 +63,7 @@ mdoci = MdocCborIssuer(
 mdoc = mdoci.new(
     doctype="eu.europa.ec.eudiw.pid.1",
     data=PID_DATA,
-    cert_path="app/keys/IACAmDLRoot01.der" # DS certificate 
+    # cert_path="app/keys/IACAmDLRoot01.der" # DS certificate 
 )
 
 ````
@@ -246,7 +246,7 @@ Other examples at [cbor official documentation](https://github.com/agronholm/cbo
 #### CBOR Diagnostic representation
 
 - [CBOR-DIAG-PY](https://github.com/chrysn/cbor-diag-py)
-- [Authlete&#39;s CBOR diagnostic tools](https://nextdev-api.authlete.net/api/cbor)
+- [Authlete's CBOR diagnostic tools](https://nextdev-api.authlete.net/api/cbor)
 - [Auth0 CBOR diagnostic tool](https://www.mdl.me/)
 
 #### X.509 certificates and chains

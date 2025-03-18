@@ -36,7 +36,7 @@ X509_NOT_VALID_AFTER = os.getenv(
 )
 
 X509_SAN_URL = os.getenv(
-    "X509_SAN_URL", "https://credential-issuer.oidc-federation.online"
+    "X509_SAN_URL", "https://credential-issuer.example.org"
 )
 
 CBORTAGS_ATTR_MAP = {

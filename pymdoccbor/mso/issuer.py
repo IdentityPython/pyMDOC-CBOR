@@ -110,7 +110,6 @@ class MsoIssuer(MsoX509Fabric):
 
                 if _value_cbortag:
                     v = cbor2.CBORTag(_value_cbortag, value=v)
-                    # print("\n-----\n K,V ", k, "\n", v)
 
                 if isinstance(v, dict):
                     for k2, v2 in v.items():
@@ -160,7 +159,7 @@ class MsoIssuer(MsoX509Fabric):
         doctype: str = None,
     ) -> Sign1Message:
         """
-        Sign a mso and returns itprivate_key
+        Sign a mso and returns it
 
         :param device_key: Union[dict, None]: the device key
         :param valid_from: Union[None, datetime.datetime]: the valid from date
@@ -234,7 +233,7 @@ class MsoIssuer(MsoX509Fabric):
             )
 
         else:
-            # print("payload diganostic notation: \n", cbor2diag(cbor2.dumps(cbor2.CBORTag(24,cbor2.dumps(payload)))))
+            logger.debug("payload diagnostic notation: {cbor2diag(cbor2.dumps(cbor2.CBORTag(24,cbor2.dumps(payload))))}")
 
             mso = Sign1Message(
                 phdr={

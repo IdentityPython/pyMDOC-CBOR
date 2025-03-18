@@ -1,18 +1,3 @@
-# Modifications have been made to the original file (available at https://github.com/IdentityPython/pyMDOC-CBOR)
-# All modifications Copyright (c) 2023 European Commission
-
-# All modifications licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import re
 
 from glob import glob
@@ -40,13 +25,11 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    url="https://github.com/peppelinux/pyMDL-MDOC",
+    url="https://github.com/IdentityPython/pyMDL-MDOC",
     author="Giuseppe De Marco",
     author_email="demarcog83@gmail.com",
     license="License :: OSI Approved :: Apache Software License",
