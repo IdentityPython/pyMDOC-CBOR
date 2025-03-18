@@ -3,7 +3,9 @@ import datetime
 import hashlib
 import secrets
 import uuid
+import logging
 
+logger = logging.getLogger("pymdoccbor")
 
 from pycose.headers import Algorithm
 from pycose.keys import CoseKey
