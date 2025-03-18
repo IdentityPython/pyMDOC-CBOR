@@ -2,8 +2,10 @@ import cbor2
 import cryptography
 import logging
 
-from pycose.keys import EC2Key
+from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
+
+from typing import Union
 
 from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
@@ -18,8 +20,6 @@ logger = logging.getLogger("pymdoccbor")
 
 class MsoVerifier:
     """
-    MsoVerifier helper class to verify a mso
-
     Parameters
         data: CBOR TAG 24
 
@@ -31,16 +31,15 @@ class MsoVerifier:
         structure as defined in RFC 8152.
     """
 
-    def __init__(self, data: cbor2.CBORTag) -> None:
+    def __init__(self, data: Union[cbor2.CBORTag, bytes, list]) -> None:
         """
-        Create a new MsoParser instance
-        
-        :param data: the data to verify
-        :type data: cbor2.CBORTag
-        
-        :raises UnsupportedMsoDataFormat: if the data format is not supported
+        Initialize the MsoParser object
+
+        :param data: Union[cbor2.CBORTag, bytes, list]: the data to parse
         """
+
         self._data = data
+
         # not used
         if isinstance(self._data, bytes):
             self.object: Sign1Message = bytes2CoseSign1(
@@ -59,28 +58,18 @@ class MsoVerifier:
     @property
     def payload_as_cbor(self) -> dict:
         """
-        Return the decoded payload
+        It returns the payload as a CBOR TAG
 
-        :return: the decoded payload
-        :rtype: dict
+        :return: dict: the payload as a CBOR TAG 24
         """
         return cbor2.loads(self.object.payload)
 
     @property
-    def payload_as_raw(self) -> bytes:
-        """
-        Return the raw payload
-
-        :return: the raw payload
-        :rtype: bytes
-        """
+    def payload_as_raw(self):
         return self.object.payload
 
     @property
-    def payload_as_dict(self) -> dict:
-        """
-        Return the payload as dict
-        """
+    def payload_as_dict(self):
         return cbor2.loads(
             cbor2.loads(self.object.payload).value
         )
@@ -88,13 +77,8 @@ class MsoVerifier:
     @property
     def raw_public_keys(self) -> bytes:
         """
-        It returns the public key extract from x509 certificates
-        looking to both phdr and uhdr
-
-        :raises MsoX509ChainNotFound: if no valid x509 certificate is found
-        
-        :return: the raw public key
-        :rtype: bytes
+            it returns the public key extract from x509 certificates
+            looking to both phdr and uhdr
         """
         _mixed_heads = self.object.phdr.items() | self.object.uhdr.items()
         for h, v in _mixed_heads:
@@ -106,7 +90,7 @@ class MsoVerifier:
             "in this MSO."
         )
 
-    def attest_public_key(self) -> None:
+    def attest_public_key(self):
         logger.warning(
             "TODO: in next releases. "
             "The certificate is to be considered as untrusted, this release "
@@ -117,8 +101,9 @@ class MsoVerifier:
     def load_public_key(self) -> None:
         """
         Load the public key from the x509 certificate
-        """
 
+        :return: None
+        """
         self.attest_public_key()
 
         for i in self.raw_public_keys:
@@ -130,17 +115,17 @@ class MsoVerifier:
 
         key = EC2Key(
             crv=settings.COSEKEY_HAZMAT_CRV_MAP[self.public_key.curve.name],
-            x=self.public_key.public_numbers().x.to_bytes(settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'),
-            y=self.public_key.public_numbers().y.to_bytes(settings.CRV_LEN_MAP[self.public_key.curve.name], 'big')
+            x=self.public_key.public_numbers().x.to_bytes(
+                settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'
+            )
         )
         self.object.key = key
 
     def verify_signature(self) -> bool:
-        """
-        Verify the signature
+        """"
+        Verify the signature of the MSO
 
-        :return: True if valid, False otherwise
-        :rtype: bool
+        :return: bool: True if the signature is valid, False otherwise
         """
         if not self.object.key:
             self.load_public_key()

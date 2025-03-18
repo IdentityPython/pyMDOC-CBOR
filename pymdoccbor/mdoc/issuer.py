@@ -1,127 +1,199 @@
+import base64
 import binascii
 import cbor2
 import logging
-
-from pycose.keys import CoseKey, EC2Key
+from cryptography.hazmat.primitives import serialization
+from pycose.keys import CoseKey
 from typing import Union
 
 from pymdoccbor.mso.issuer import MsoIssuer
-from pymdoccbor.mdoc.exceptions import MissingPrivateKey
 
-logger = logging.getLogger('pymdoccbor')
+from cbor_diag import *
+
+
+logger = logging.getLogger("pymdoccbor")
 
 
 class MdocCborIssuer:
     """
     MdocCborIssuer helper class to create a new mdoc
     """
-
-    def __init__(self, private_key: Union[dict, EC2Key, CoseKey]):
+    def __init__(
+        self,
+        key_label: str = None,
+        user_pin: str = None,
+        lib_path: str = None,
+        slot_id: int = None,
+        hsm: bool = False,
+        alg: str = None,
+        kid: str = None,
+        private_key: Union[dict, CoseKey] = {},
+    ):
         """
-        Create a new MdocCborIssuer instance
+        Initialize a new MdocCborIssuer
 
-        :param private_key: the private key to sign the mdoc
-        :type private_key: dict | CoseKey
-
-        :raises MissingPrivateKey: if no private key is provided
+        :param key_label: str: key label
+        :param user_pin: str: user pin
+        :param lib_path: str: path to the library cryptographic library
+        :param slot_id: int: slot id
+        :param hsm: bool: hardware security module
+        :param alg: str: hashig algorithm
+        :param kid: str: key id
+        :param private_key: Union[dict, CoseKey]: private key
         """
-        self.version: str = '1.0'
+        self.version: str = "1.0"
         self.status: int = 0
 
-        if isinstance(private_key, dict):
-            self.private_key = CoseKey.from_dict(private_key)
-        elif isinstance(private_key, EC2Key):
-            ec2_encoded = private_key.encode()
-            ec2_decoded = CoseKey.decode(ec2_encoded)
-            self.private_key = ec2_decoded
-        elif isinstance(private_key, CoseKey):
-            self.private_key = private_key
-        else:
-            raise MissingPrivateKey("You must provide a private key")
+        if private_key:
+            if isinstance(private_key, dict):
+                self.private_key = CoseKey.from_dict(private_key)
+            elif isinstance(private_key, EC2Key):
+                ec2_encoded = private_key.encode()
+                ec2_decoded = CoseKey.decode(ec2_encoded)
+                self.private_key = ec2_decoded
+            elif isinstance(private_key, CoseKey):
+                self.private_key = private_key
+            else:
+                raise ValueError("private_key must be a dict or CoseKey object")
 
-        
-        self.signed :dict = {}
+        self.signed: dict = {}
+        self.key_label = key_label
+        self.user_pin = user_pin
+        self.lib_path = lib_path
+        self.slot_id = slot_id
+        self.hsm = hsm
+        self.alg = alg
+        self.kid = kid
 
     def new(
         self,
-        data: dict | list[dict],
-        devicekeyinfo: Union[dict, CoseKey],
-        doctype: str | None = None
-    ) -> dict:
+        data: dict,
+        doctype: str,
+        validity: dict = None,
+        devicekeyinfo: Union[dict, CoseKey, str] = None,
+        cert_path: str = None,
+        revocation: dict = None,
+    ):
         """
         create a new mdoc with signed mso
 
-        :param data: the data to sign
-        Can be a dict, representing the single document, or a list of dicts containg the doctype and the data
-        Example:
-        {doctype: "org.iso.18013.5.1.mDL", data: {...}}
-        :type data: dict | list[dict]
-        :param devicekeyinfo: the device key info
-        :type devicekeyinfo: dict | CoseKey
-        :param doctype: the document type (optional if data is a list)
-        :type doctype: str | None
+        :param data: dict: data to be signed
+        :param doctype: str: document type
+        :param validity: dict: validity info
+        :param devicekeyinfo: Union[dict, CoseKey, str]: device key info
+        :param cert_path: str: path to the certificate
+        :param revocation: dict: revocation info
 
-        :return: the signed mdoc
-        :rtype: dict
+        :return: dict: signed mdoc
         """
         if isinstance(devicekeyinfo, dict):
             devicekeyinfo = CoseKey.from_dict(devicekeyinfo)
+        if isinstance(devicekeyinfo, str):
+            device_key_bytes = base64.urlsafe_b64decode(devicekeyinfo.encode("utf-8"))
+            public_key = serialization.load_pem_public_key(device_key_bytes)
+            curve_name = public_key.curve.name
+            curve_map = {
+                "secp256r1": 1,  # NIST P-256
+                "secp384r1": 2,  # NIST P-384
+                "secp521r1": 3,  # NIST P-521
+                "brainpoolP256r1": 8,  # Brainpool P-256
+                "brainpoolP384r1": 9,  # Brainpool P-384
+                "brainpoolP512r1": 10,  # Brainpool P-512
+                # Add more curve mappings as needed
+            }
+            curve_identifier = curve_map.get(curve_name)
+
+            # Extract the x and y coordinates from the public key
+            x = public_key.public_numbers().x.to_bytes(
+                (public_key.public_numbers().x.bit_length() + 7)
+                // 8,  # Number of bytes needed
+                "big",  # Byte order
+            )
+
+            y = public_key.public_numbers().y.to_bytes(
+                (public_key.public_numbers().y.bit_length() + 7)
+                // 8,  # Number of bytes needed
+                "big",  # Byte order
+            )
+
+            devicekeyinfo = {
+                1: 2,
+                -1: curve_identifier,
+                -2: x,
+                -3: y,
+            }
+
         else:
             devicekeyinfo: CoseKey = devicekeyinfo
 
-        if isinstance(data, dict):
-            data = [{"doctype": doctype, "data": data}]
-
-        documents = []
-
-        for doc in data:
+        if self.hsm:
             msoi = MsoIssuer(
-                data=doc["data"],
-                private_key=self.private_key
+                data=data,
+                cert_path=cert_path,
+                hsm=self.hsm,
+                key_label=self.key_label,
+                user_pin=self.user_pin,
+                lib_path=self.lib_path,
+                slot_id=self.slot_id,
+                alg=self.alg,
+                kid=self.kid,
+                validity=validity,
+                revocation=revocation,
             )
 
-            mso = msoi.sign()
+        else:
+            msoi = MsoIssuer(
+                data=data,
+                private_key=self.private_key,
+                alg=self.alg,
+                cert_path=cert_path,
+                validity=validity,
+                revocation=revocation,
+            )
 
-            document = {
-                'docType': doc["doctype"],  # 'org.iso.18013.5.1.mDL'
-                'issuerSigned': {
+        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo)
+
+        mso_cbor = mso.encode(
+            tag=False,
+            hsm=self.hsm,
+            key_label=self.key_label,
+            user_pin=self.user_pin,
+            lib_path=self.lib_path,
+            slot_id=self.slot_id,
+        )
+
+        res = {
+            "version": self.version,
+            "documents": [{
+                "docType": doctype,  # 'org.iso.18013.5.1.mDL'
+                "issuerSigned": {
                     "nameSpaces": {
-                        ns: [
-                            cbor2.CBORTag(24, value={k: v}) for k, v in dgst.items()
-                        ]
+                        ns: [v for k, v in dgst.items()]
                         for ns, dgst in msoi.disclosure_map.items()
                     },
-                    "issuerAuth": mso.encode()
+                    "issuerAuth": cbor2.decoder.loads(mso_cbor),
                 },
-                # this is required during the presentation.
-                #  'deviceSigned': {
-                    #  # TODO
-                #  }
-            }
-
-            documents.append(document)
-
-        self.signed = {
-            'version': self.version,
-            'documents': documents,
-            'status': self.status
+            }],
+            "status": self.status,
         }
+
+        logger.debug(f"MSO diagnostic notation: {cbor2diag(mso_cbor)}")
+
+        self.signed = res
         return self.signed
-    
-    def dump(self):
-        """
-        Returns the signed mdoc in CBOR format
 
-        :return: the signed mdoc in CBOR format
-        :rtype: bytes
+    def dump(self) -> bytes:
         """
-        return cbor2.dumps(self.signed)
+        Returns the CBOR representation of the signed mdoc
 
-    def dumps(self):
+        :return: bytes: CBOR representation of the signed mdoc
         """
-        Returns the signed mdoc in AF binary repr
+        return cbor2.dumps(self.signed, canonical=True)
 
-        :return: the signed mdoc in AF binary repr
-        :rtype: bytes
+    def dumps(self) -> bytes:
         """
-        return binascii.hexlify(cbor2.dumps(self.signed))
+        Returns the AF binary representation of the signed mdoc
+
+        :return: bytes: AF binary representation of the signed mdoc
+        """
+        return binascii.hexlify(cbor2.dumps(self.signed, canonical=True))

@@ -53,13 +53,17 @@ PID_DATA = {
 }
 
 mdoci = MdocCborIssuer(
-    private_key=PKEY
+    private_key=PKEY,
+    alg="ES256",
 )
 
 mdoc = mdoci.new(
     doctype="org.iso.18013.5.1.mDL",
     data=PID_DATA,
-    devicekeyinfo=PKEY  # TODO
+    validity={
+        "issuance_date": "2024-12-31",
+        "expiry_date": "2050-12-31"
+    },
 )
 
 mdoc

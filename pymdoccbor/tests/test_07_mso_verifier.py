@@ -1,3 +1,4 @@
+
 import os
 from pycose.keys import CoseKey, EC2Key
 from pymdoccbor.mso.verifier import MsoVerifier
@@ -7,11 +8,19 @@ from pycose.messages import CoseMessage
 from pymdoccbor.tests.pkey import PKEY
 
 
-mdoc = MdocCborIssuer(PKEY)
+mdoc = MdocCborIssuer(
+    private_key=PKEY,
+    alg="ES256",
+)
+
 mdoc.new(
     data=MICOV_DATA,
-    devicekeyinfo=PKEY,  # TODO
-    doctype="org.micov.medical.1"
+    #devicekeyinfo=PKEY,  # TODO
+    doctype="org.micov.medical.1",
+    validity={
+        "issuance_date": "2024-12-31",
+        "expiry_date": "2050-12-31"
+    },
 )
 
 def test_mso_verifier_fail():
@@ -39,11 +48,11 @@ def test_mso_verifier_payload_as_cbor():
 
     msov = MsoVerifier(issuerAuth)
 
-    cbor = msov.payload_as_cbor
+    cbor = msov.payload_as_dict
 
     assert cbor
     assert cbor["version"] == "1.0"
-    assert cbor["digestAlgorithm"] == "sha256"
+    assert cbor["digestAlgorithm"] == "SHA-256"
     assert cbor["valueDigests"]["org.micov.medical.1"]
 
 def test_payload_as_raw():

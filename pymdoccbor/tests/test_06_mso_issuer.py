@@ -14,11 +14,15 @@ def test_mso_issuer_fail():
 def test_mso_issuer_creation():
     msoi = MsoIssuer(
         data=MICOV_DATA,
-        private_key=PKEY
+        private_key=PKEY,
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
+        alg="ES256"
     )
 
     assert msoi.private_key
-    assert msoi.public_key
     assert msoi.data
     assert msoi.hash_map
     assert list(msoi.hash_map.keys())[0] == 'org.micov.medical.1'
@@ -27,7 +31,12 @@ def test_mso_issuer_creation():
 def test_mso_issuer_sign():
     msoi = MsoIssuer(
         data=MICOV_DATA,
-        private_key=PKEY
+        private_key=PKEY,
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
+        alg="ES256"
     )
 
     mso = msoi.sign()

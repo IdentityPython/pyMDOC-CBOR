@@ -2,15 +2,21 @@ from pycose.keys import EC2Key
 from pymdoccbor.mdoc.issuersigned import IssuerSigned
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
-from pymdoccbor.tests.test_03_mdoc_issuer import mdoc
 from pymdoccbor.tests.pkey import PKEY
 
 
-mdoc = MdocCborIssuer(PKEY)
+mdoc = MdocCborIssuer(
+    private_key=PKEY,
+    alg="ES256",
+)
 mdoc.new(
     data=MICOV_DATA,
-    devicekeyinfo=PKEY,  # TODO
-    doctype="org.micov.medical.1"
+    #devicekeyinfo=PKEY,  # TODO
+    doctype="org.micov.medical.1",
+    validity={
+        "issuance_date": "2024-12-31",
+        "expiry_date": "2050-12-31"
+    },
 )
 issuerAuth = mdoc.signed["documents"][0]["issuerSigned"]
 issuer_signed = IssuerSigned(**issuerAuth)

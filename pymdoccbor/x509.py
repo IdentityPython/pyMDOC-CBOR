@@ -2,19 +2,27 @@ import datetime
 import os
 
 from cwt import COSEKey
+from typing import Union
 
 from cryptography import x509
 from cryptography.x509.oid import NameOID
+from cryptography.x509 import Certificate
 from cryptography.hazmat.primitives import hashes, serialization
 
-from . import settings
-
+from pymdoccbor import settings
 
 class MsoX509Fabric:
+    """
+    MsoX509Fabric helper class to create a new mso
+    """
 
-    def selfsigned_x509cert(self, encoding: str = "DER"):
+    def selfsigned_x509cert(self, encoding: str = "DER") -> Union[Certificate, bytes]:
         """
-            returns an X.509 certificate derived from the private key of the MSO Issuer
+        Returns an X.509 certificate derived from the private key of the MSO Issuer
+
+        :param encoding: str: the encoding to use, default is DER
+
+        :return: Union[Certificate, bytes]: the X.509 certificate
         """
         ckey = COSEKey.from_bytes(self.private_key.encode())
 

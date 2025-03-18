@@ -13,7 +13,7 @@ logger = logging.getLogger('pymdoccbor')
 
 class MobileDocument:
     """
-    MobileDocument helper class to verify a mdoc
+    MobileDocument class to handle the Mobile Document
     """
 
     _states = {
@@ -21,114 +21,113 @@ class MobileDocument:
         False: "failed",
     }
 
-    def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}):
+    def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}) -> None:
         """
-        Create a new MobileDocument instance
+        Initialize the MobileDocument object
 
-        :param docType: the document type
-        :type docType: str
-        :param issuerSigned: the issuer signed data
-        :type issuerSigned: dict
-        :param deviceSigned: the device signed data
-        :type deviceSigned: dict
-
-        :raises NoDocumentTypeProvided: if no document type is provided
-        :raises NoSignedDocumentProvided: if no signed document is provided
+        :param docType: str: the document type
+        :param issuerSigned: dict: the issuerSigned info
+        :param deviceSigned: dict: the deviceSigned info
         """
 
         if not docType:
             raise NoDocumentTypeProvided("You must provide a document type")
-        
+
+        self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
+
         if not issuerSigned:
             raise NoSignedDocumentProvided("You must provide a signed document")
-        
-        self.doctype: str = docType  # eg: 'org.iso.18013.5.1.mDL'
-        self.issuersigned: IssuerSigned = IssuerSigned(**issuerSigned)
-        self.is_valid = False
 
-        # TODO
+        self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
+        self.is_valid = False
         self.devicesigned: dict = deviceSigned
 
     def dump(self) -> dict:
         """
-        Returns a dict representation of the document
+        It returns the document as a dict
 
-        :return: the document as dict
-        :rtype: dict
+        :return: dict: the document as a dict
         """
-
         return {
             'docType': self.doctype,
             'issuerSigned': self.issuersigned.dump()
         }
     
-    def dumps(self) -> str:
+    def dumps(self) -> bytes:
         """
-        Returns an AF binary repr of the document
+        It returns the AF binary repr as bytes
 
-        :return: the document as AF binary
-        :rtype: str
+        :return: bytes: the document as bytes
         """
         return binascii.hexlify(self.dump())
     
     def dump(self) -> bytes:
         """
-        Returns a CBOR repr of the document
+        It returns the document as bytes
 
-        :return: the document as CBOR
-        :rtype: bytes
+        :return: dict: the document as bytes
         """
         return cbor2.dumps(
-            cbor2.CBORTag(24, value={
-                'docType': self.doctype,
-                'issuerSigned': self.issuersigned.dumps()
-            })
+            cbor2.CBORTag(
+                24, 
+                value={
+                    'docType': self.doctype,
+                    'issuerSigned': self.issuersigned.dumps()
+                }
+            )
         )
 
     def verify(self) -> bool:
         """
         Verify the document signature
 
-        :return: True if valid, False otherwise
-        :rtype: bool
+        :return: bool: True if the signature is valid, False otherwise
         """
-
         self.is_valid = self.issuersigned.issuer_auth.verify_signature()
         return self.is_valid
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__module__}.{self.__class__.__name__} [{self._states[self.is_valid]}]"
 
 
 class MdocCbor:
+    """
+    MdocCbor class to handle the Mobile Document
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Initialize the MdocCbor object
+        """
         self.data_as_bytes: bytes = b""
         self.data_as_cbor_dict: dict = {}
 
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
 
-    def load(self, data: bytes):
-        data = binascii.hexlify(data)
-        return self.loads(data)
+    def loads(self, data: str) -> None:
+        """
+        Load the data from a AF Binary string
 
-    def loads(self, data: str):
+        :param data: str: the AF binary string
         """
-        data is a AF BINARY
-        """
+        if isinstance(data, bytes):
+            data = binascii.hexlify(data)
+
         self.data_as_bytes = binascii.unhexlify(data)
         self.data_as_cbor_dict = cbor2.loads(self.data_as_bytes)
 
     def dump(self) -> bytes:
         """
-            returns bytes
+        Returns the CBOR representation of the mdoc as bytes
         """
         return self.data_as_bytes
 
-    def dumps(self) -> str:
+    def dumps(self) -> bytes:
         """
-            returns AF binary string representation
+        Returns the AF binary representation of the mdoc as bytes
+
+        :return: bytes: the AF binary representation of the mdoc
         """
         return binascii.hexlify(self.data_as_bytes)
 
@@ -137,6 +136,12 @@ class MdocCbor:
         return self.dumps().decode()
 
     def verify(self) -> bool:
+        """"
+        Verify signatures of all documents contained in the mdoc
+
+        :return: bool: True if all signatures are valid, False otherwise
+        """
+
         cdict = self.data_as_cbor_dict
 
         for i in ('version', 'documents'):
@@ -166,7 +171,7 @@ class MdocCbor:
 
         return False if self.documents_invalid else True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"{self.__module__}.{self.__class__.__name__} "
             f"[{len(self.documents)} valid documents]"

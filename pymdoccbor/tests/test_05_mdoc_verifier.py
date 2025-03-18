@@ -17,11 +17,18 @@ def test_verifier_must_fail_issuer_signed():
         assert str(e) == "You must provide a signed document"
 
 def test_mobile_document():
-    mdoc = MdocCborIssuer(PKEY)
+    mdoc = MdocCborIssuer(
+        private_key=PKEY,
+        alg="ES256",
+    )
     mdoc.new(
         data=MICOV_DATA,
-        devicekeyinfo=PKEY,  # TODO
-        doctype="org.micov.medical.1"
+        #devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1",
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
     )
 
 
@@ -32,11 +39,18 @@ def test_mobile_document():
     assert doc.issuersigned
 
 def test_mobile_document_dump():
-    mdoc = MdocCborIssuer(PKEY)
+    mdoc = MdocCborIssuer(
+        private_key=PKEY,
+        alg="ES256"
+    )
     mdoc.new(
         data=MICOV_DATA,
-        devicekeyinfo=PKEY,  # TODO
-        doctype="org.micov.medical.1"
+        #devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1",
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
     )
 
 
@@ -49,11 +63,18 @@ def test_mobile_document_dump():
     assert len(dump) > 0
 
 def test_mobile_document_dumps():
-    mdoc = MdocCborIssuer(PKEY)
+    mdoc = MdocCborIssuer(
+        private_key=PKEY,
+        alg="ES256"
+    )
     mdoc.new(
         data=MICOV_DATA,
-        devicekeyinfo=PKEY,  # TODO
-        doctype="org.micov.medical.1"
+        #devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1",
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
     )
 
 
@@ -66,11 +87,18 @@ def test_mobile_document_dumps():
     assert len(dumps) > 0
 
 def test_mobile_document_verify():
-    mdoc = MdocCborIssuer(PKEY)
+    mdoc = MdocCborIssuer(
+        private_key=PKEY,
+        alg="ES256"
+    )
     mdoc.new(
         data=MICOV_DATA,
-        devicekeyinfo=PKEY,  # TODO
-        doctype="org.micov.medical.1"
+        #devicekeyinfo=PKEY,  # TODO
+        doctype="org.micov.medical.1",
+        validity={
+            "issuance_date": "2024-12-31",
+            "expiry_date": "2050-12-31"
+        },
     )
 
     document = mdoc.signed["documents"][0]
