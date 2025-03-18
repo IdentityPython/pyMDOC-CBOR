@@ -4,8 +4,15 @@ import hashlib
 import secrets
 import uuid
 
+
 from pycose.headers import Algorithm
 from pycose.keys import CoseKey
+
+from datetime import timezone
+
+from pycose.headers import Algorithm #, KID
+from pycose.keys import CoseKey, EC2Key
+
 from pycose.messages import Sign1Message
 
 from typing import Union
@@ -167,10 +174,12 @@ class MsoIssuer(MsoX509Fabric):
 
         :return: Sign1Message: the signed mso
         """
+
         utcnow = datetime.datetime.utcnow()
         valid_from = datetime.datetime.strptime(
             self.validity["issuance_date"], "%Y-%m-%d"
         )
+
         if settings.PYMDOC_EXP_DELTA_HOURS:
             exp = utcnow + datetime.timedelta(hours=settings.PYMDOC_EXP_DELTA_HOURS)
         else:

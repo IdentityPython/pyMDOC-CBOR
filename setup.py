@@ -1,7 +1,5 @@
 import re
-
-from glob import glob
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def readme():
@@ -27,6 +25,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     url="https://github.com/IdentityPython/pyMDL-MDOC",
@@ -34,14 +33,8 @@ setup(
     author_email="demarcog83@gmail.com",
     license="License :: OSI Approved :: Apache Software License",
     # scripts=[f'{_pkg_name}/bin/{_pkg_name}'],
-    packages=[f"{_pkg_name}"],
-    package_dir={f"{_pkg_name}": f"{_pkg_name}"},
-    package_data={
-        f"{_pkg_name}": [
-            i.replace(f"{_pkg_name}/", "")
-            for i in glob(f"{_pkg_name}/**", recursive=True)
-        ]
-    },
+    packages=find_packages(include=["pymdoccbor", "pymdoccbor.*"]),
+    include_package_data=True,
     install_requires=[
         "cbor2>=5.4.0,<5.5.0",
         "cwt>=2.3.0,<2.4",
