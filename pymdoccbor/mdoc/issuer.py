@@ -47,6 +47,10 @@ class MdocCborIssuer:
         if private_key:
             if isinstance(private_key, dict):
                 self.private_key = CoseKey.from_dict(private_key)
+            elif isinstance(private_key, EC2Key):
+                ec2_encoded = private_key.encode()
+                ec2_decoded = CoseKey.decode(ec2_encoded)
+                self.private_key = ec2_decoded
             elif isinstance(private_key, CoseKey):
                 self.private_key = private_key
             else:
@@ -173,7 +177,7 @@ class MdocCborIssuer:
             "status": self.status,
         }
 
-        # print("mso diganostic notation: \n", cbor2diag(mso_cbor))
+        logger.debug(f"MSO diagnostic notation: {cbor2diag(mso_cbor)}")
 
         self.signed = res
         return self.signed

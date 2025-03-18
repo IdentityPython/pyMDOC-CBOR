@@ -102,7 +102,7 @@ mdoc = mdoci.new(
     doctype="eu.europa.ec.eudiw.pid.1",
     data=PID_DATA,
     devicekeyinfo=PKEY  # TODO
-    cert_path="/path/"
+    # cert_path="/path/"
 )
 
 mdoc
