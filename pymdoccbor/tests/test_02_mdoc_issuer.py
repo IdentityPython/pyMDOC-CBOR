@@ -59,7 +59,7 @@ def test_mdoc_issuer():
         private_key=PKEY,
         alg = "ES256"
     )
-    with open("/Users/olivier/PycharmProjects/pymdoccbor_oli/pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
+    with open("pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
         fake_cert_file = file.read()
         asl_signing_cert = x509.load_pem_x509_certificate(fake_cert_file)
         _asl_signing_cert = asl_signing_cert.public_bytes(getattr(serialization.Encoding, "DER"))
