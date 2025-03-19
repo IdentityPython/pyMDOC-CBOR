@@ -34,7 +34,6 @@ class MsoIssuer(MsoX509Fabric):
         data: dict,
         validity: dict,
         cert_path: str = None,
-        pem_cert_path: str = None,
         key_label: str = None,
         user_pin: str = None,
         lib_path: str = None,
@@ -86,7 +85,6 @@ class MsoIssuer(MsoX509Fabric):
         self.data: dict = data
         self.hash_map: dict = {}
         self.cert_path = cert_path
-        self.pem_cert_path = pem_cert_path
         self.disclosure_map: dict = {}
         self.digest_alg: str = digest_alg
         self.key_label = key_label
@@ -208,20 +206,19 @@ class MsoIssuer(MsoX509Fabric):
         }
 
         if self.cert_path:
-            # Load the DER certificate file
+            # Try to load the certificate file
             with open(self.cert_path, "rb") as file:
                 certificate = file.read()
-
-            cert = x509.load_der_x509_certificate(certificate)
-
-            _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
-        elif self.pem_cert_path:
-            # Load the PEM certificate file
-            with open(self.pem_cert_path, "rb") as file:
-                certificate = file.read()
-
-            cert = x509.load_pem_x509_certificate(certificate)
-
+            try:
+                cert = x509.load_pem_x509_certificate(certificate)
+            except Exception as e:
+                logger.error(f"Certificate at {self.cert_path} could not be loaded as PEM, trying DER")
+                try:
+                    cert = x509.load_der_x509_certificate(certificate)
+                except Exception as e:
+                    _err_msg = f"Certificate at {self.cert_path} could not be loaded as DER"
+                    logger.critical(_err_msg)
+                    raise Exception(_err_msg)
             _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
         else:
             _cert = self.selfsigned_x509cert()

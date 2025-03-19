@@ -74,7 +74,6 @@ class MdocCborIssuer:
         validity: dict = None,
         devicekeyinfo: Union[dict, CoseKey, str] = None,
         cert_path: str = None,
-        pem_cert_path: str = None,
         status_list: dict = {},
     ):
         """
@@ -139,7 +138,6 @@ class MdocCborIssuer:
             msoi = MsoIssuer(
                 data=data,
                 cert_path=cert_path,
-                pem_cert_path=pem_cert_path,
                 hsm=self.hsm,
                 key_label=self.key_label,
                 user_pin=self.user_pin,
@@ -157,12 +155,11 @@ class MdocCborIssuer:
                 private_key=self.private_key,
                 alg=self.alg,
                 cert_path=cert_path,
-                pem_cert_path=pem_cert_path,
                 validity=validity,
                 status_list=status_list
             )
 
-        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.datetime.now())
+        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.datetime.now(datetime. UTC))
 
         mso_cbor = mso.encode(
             tag=False,
