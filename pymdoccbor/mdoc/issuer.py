@@ -74,7 +74,8 @@ class MdocCborIssuer:
         validity: dict = None,
         devicekeyinfo: Union[dict, CoseKey, str] = None,
         cert_path: str = None,
-        status_list: dict = {},
+        status_list: dict = None,
+        revocation: dict = None
     ):
         """
         create a new mdoc with signed mso
@@ -85,6 +86,7 @@ class MdocCborIssuer:
         :param devicekeyinfo: Union[dict, CoseKey, str]: device key info
         :param cert_path: str: path to the certificate
         :param status_list: dict: The status list to include in the mso of the mdoc
+        :param revocation: dict: The status list to include in the mso of the mdoc
 
         :return: dict: signed mdoc
         """
@@ -146,7 +148,8 @@ class MdocCborIssuer:
                 alg=self.alg,
                 kid=self.kid,
                 validity=validity,
-                status_list=status_list
+                status_list=status_list,
+                revocation=revocation
             )
 
         else:
@@ -156,7 +159,8 @@ class MdocCborIssuer:
                 alg=self.alg,
                 cert_path=cert_path,
                 validity=validity,
-                status_list=status_list
+                status_list=status_list,
+                revocation=revocation
             )
 
         mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.datetime.now(datetime. UTC))
