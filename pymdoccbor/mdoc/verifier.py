@@ -136,7 +136,7 @@ class MdocCbor:
     def data_as_string(self) -> str:
         return self.dumps().decode()
     
-    def _deode_claims(self, claims: list[dict]) -> dict:
+    def _decode_claims(self, claims: list[dict]) -> dict:
         decoded_claims = {}
 
         for claim in claims:
@@ -189,7 +189,7 @@ class MdocCbor:
                     self.documents_invalid.append(mso)
 
                 for namespace, claims in mso.issuersigned.namespaces.items():
-                    self.disclosure_map[namespace] = self._deode_claims(claims)
+                    self.disclosure_map[namespace] = self._decode_claims(claims)
 
             except Exception as e:
                 logger.error(
