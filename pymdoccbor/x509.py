@@ -1,6 +1,3 @@
-import datetime
-import os
-
 from cwt import COSEKey
 from typing import Union
 
