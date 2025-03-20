@@ -163,7 +163,7 @@ class MdocCborIssuer:
                 revocation=revocation
             )
 
-        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.datetime.now(datetime. UTC))
+        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.datetime.now(datetime.UTC))
 
         mso_cbor = mso.encode(
             tag=False,
