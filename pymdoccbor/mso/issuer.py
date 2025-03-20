@@ -19,6 +19,7 @@ from pymdoccbor.x509 import MsoX509Fabric
 from pymdoccbor.tools import shuffle_dict
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
+from cryptography.x509 import Certificate
 
 
 from cbor_diag import *
@@ -223,10 +224,10 @@ class MsoIssuer(MsoX509Fabric):
                     _err_msg = f"Certificate at {self.cert_path} could not be loaded as DER"
                     logger.error(_err_msg)
 
-             if _parsed_cert:
-                 cert = _parsed_cert
-             else:
-                 raise Exception(f"Certificate at {self.cert_path} failed parse")
+            if _parsed_cert:
+                cert = _parsed_cert
+            else:
+                raise Exception(f"Certificate at {self.cert_path} failed parse")
             _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
         else:
             _cert = self.selfsigned_x509cert()
