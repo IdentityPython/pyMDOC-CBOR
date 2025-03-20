@@ -27,3 +27,5 @@ def test_mdoc_cbor_creation():
     mdocp.verify()
 
     assert mdoc
+    assert 'org.micov.medical.1' in mdocp.disclosure_map
+    assert mdocp.disclosure_map == MICOV_DATA
