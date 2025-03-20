@@ -74,6 +74,8 @@ mdoc = mdoci.new(
 The method `.new()` gets the user attributes, devicekeyinfo and doctype.
 
 ````
+import os
+
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 
 PKEY = {
@@ -95,13 +97,15 @@ PID_DATA = {
     }
 
 mdoci = MdocCborIssuer(
-    private_key=PKEY
+    private_key=PKEY,
+    alg = "ES256"
 )
 
 mdoc = mdoci.new(
     doctype="eu.europa.ec.eudiw.pid.1",
     data=PID_DATA,
-    devicekeyinfo=PKEY  # TODO
+    devicekeyinfo=PKEY,
+    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" },
     # cert_path="/path/"
 )
 
@@ -161,7 +165,7 @@ API usage:
 - `msoi.disclosure_map`, disclosure objects grouped by namespaces
 - `msoi.sign`, signs the MSO and returns it
 
-### Parse a binary Mdoc
+### [Presentation] Parse a binary MDocCBOR
 
 ````
 from pymdoccbor.mdoc.verifier import MdocCbor
@@ -176,6 +180,9 @@ mdoc
 
 mdoc.documents
 >> [pymdoccbor.mdoc.verifier.MobileDocument [valid]]
+
+mdoc.disclosure_map
+>> ... dictionary containing all the disclosed attributes ...
 ````
 
 ### Verify the Mobile Security Object

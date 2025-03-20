@@ -105,7 +105,7 @@ class MdocCbor:
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
         self.disclosure_map: dict = {}
-
+    
     def loads(self, data: str) -> None:
         """
         Load the data from a AF Binary string

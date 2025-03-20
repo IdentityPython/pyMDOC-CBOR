@@ -75,7 +75,7 @@ class MdocCborIssuer:
         devicekeyinfo: Union[dict, CoseKey, str] = None,
         cert_path: str = None,
         revocation: dict = None
-    ):
+    ) -> dict:
         """
         create a new mdoc with signed mso
 
