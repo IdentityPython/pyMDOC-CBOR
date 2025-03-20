@@ -210,16 +210,23 @@ class MsoIssuer(MsoX509Fabric):
             # Try to load the certificate file
             with open(self.cert_path, "rb") as file:
                 certificate = file.read()
+            _parsed_cert: Union[Certificate, None] = None
             try:
-                cert = x509.load_pem_x509_certificate(certificate)
+                _parsed_cert = x509.load_pem_x509_certificate(certificate)
             except Exception as e:
                 logger.error(f"Certificate at {self.cert_path} could not be loaded as PEM, trying DER")
+            
+            if not _parsed_cert:
                 try:
-                    cert = x509.load_der_x509_certificate(certificate)
+                    _parsed_cert = x509.load_der_x509_certificate(certificate)
                 except Exception as e:
                     _err_msg = f"Certificate at {self.cert_path} could not be loaded as DER"
-                    logger.critical(_err_msg)
-                    raise Exception(_err_msg)
+                    logger.error(_err_msg)
+
+             if _parsed_cert:
+                 cert = _parsed_cert
+             else:
+                 raise Exception(f"Certificate at {self.cert_path} failed parse")
             _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
         else:
             _cert = self.selfsigned_x509cert()
