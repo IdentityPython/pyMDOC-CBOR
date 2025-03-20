@@ -117,7 +117,8 @@ class MsoVerifier:
             crv=settings.COSEKEY_HAZMAT_CRV_MAP[self.public_key.curve.name],
             x=self.public_key.public_numbers().x.to_bytes(
                 settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'
-            )
+            ),
+            y=self.public_key.public_numbers().y.to_bytes( settings.CRV_LEN_MAP[self.public_key.curve.name], 'big')
         )
         self.object.key = key
 

@@ -7,18 +7,11 @@ import logging
 
 logger = logging.getLogger("pymdoccbor")
 
-from pycose.headers import Algorithm
-from pycose.keys import CoseKey
-
-from datetime import timezone
-
 from pycose.headers import Algorithm #, KID
 from pycose.keys import CoseKey, EC2Key
-
 from pycose.messages import Sign1Message
 
 from typing import Union
-
 
 from pymdoccbor.exceptions import MsoPrivateKeyRequired
 from pymdoccbor import settings
@@ -26,6 +19,7 @@ from pymdoccbor.x509 import MsoX509Fabric
 from pymdoccbor.tools import shuffle_dict
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
+from cryptography.x509 import Certificate
 
 
 from cbor_diag import *
@@ -40,7 +34,6 @@ class MsoIssuer(MsoX509Fabric):
         self,
         data: dict,
         validity: dict,
-        revocation: str = None,
         cert_path: str = None,
         key_label: str = None,
         user_pin: str = None,
@@ -51,13 +44,13 @@ class MsoIssuer(MsoX509Fabric):
         hsm: bool = False,
         private_key: Union[dict, CoseKey] = None,
         digest_alg: str = settings.PYMDOC_HASHALG,
+        revocation: dict = None
     ) -> None:
         """
         Initialize a new MsoIssuer
 
         :param data: dict: the data to sign
         :param validity: validity: the validity info of the mso
-        :param revocation: str: the revocation status
         :param cert_path: str: the path to the certificate
         :param key_label: str: key label
         :param user_pin: str: user pin
@@ -68,6 +61,7 @@ class MsoIssuer(MsoX509Fabric):
         :param hsm: bool: hardware security module
         :param private_key: Union[dict, CoseKey]: the signing key
         :param digest_alg: str: the digest algorithm
+        :param revocation: dict: revocation status dict to include in the mso, it may include status_list and identifier_list keys
         """
 
         if not hsm:
@@ -82,10 +76,10 @@ class MsoIssuer(MsoX509Fabric):
                     raise ValueError("private_key must be a dict or CoseKey object")
             else:
                 raise MsoPrivateKeyRequired("MSO Writer requires a valid private key")
-            
+
         if not validity:
             raise ValueError("validity must be present")
-        
+
         if not alg:
             raise ValueError("alg must be present")
 
@@ -208,19 +202,32 @@ class MsoIssuer(MsoX509Fabric):
             "deviceKeyInfo": {
                 "deviceKey": device_key,
             },
-            "digestAlgorithm": alg_map.get(self.alg),
+            "digestAlgorithm": alg_map.get(self.alg)
         }
-
         if self.revocation is not None:
             payload.update({"status": self.revocation})
 
         if self.cert_path:
-            # Load the DER certificate file
+            # Try to load the certificate file
             with open(self.cert_path, "rb") as file:
                 certificate = file.read()
+            _parsed_cert: Union[Certificate, None] = None
+            try:
+                _parsed_cert = x509.load_pem_x509_certificate(certificate)
+            except Exception as e:
+                logger.error(f"Certificate at {self.cert_path} could not be loaded as PEM, trying DER")
+            
+            if not _parsed_cert:
+                try:
+                    _parsed_cert = x509.load_der_x509_certificate(certificate)
+                except Exception as e:
+                    _err_msg = f"Certificate at {self.cert_path} could not be loaded as DER"
+                    logger.error(_err_msg)
 
-            cert = x509.load_der_x509_certificate(certificate)
-
+            if _parsed_cert:
+                cert = _parsed_cert
+            else:
+                raise Exception(f"Certificate at {self.cert_path} failed parse")
             _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
         else:
             _cert = self.selfsigned_x509cert()
