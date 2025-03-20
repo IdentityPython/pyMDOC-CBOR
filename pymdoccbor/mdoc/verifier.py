@@ -104,6 +104,7 @@ class MdocCbor:
 
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
+        self.disclosure_map: dict = {}
 
     def loads(self, data: str) -> None:
         """
@@ -134,6 +135,33 @@ class MdocCbor:
     @property
     def data_as_string(self) -> str:
         return self.dumps().decode()
+    
+    def _deode_claims(self, claims: list[dict]) -> dict:
+        decoded_claims = {}
+
+        for claim in claims:
+            decoded = cbor2.loads(claim.value)
+
+            if isinstance(decoded['elementValue'], cbor2.CBORTag):
+                decoded_claims[decoded['elementIdentifier']] = decoded['elementValue'].value
+            elif isinstance(decoded['elementValue'], list):
+                claims_list = []
+
+                for element in decoded['elementValue']:
+                    claims_dict = {}
+                    for key, value in element.items():
+                        if isinstance(value, cbor2.CBORTag):
+                            claims_dict[key] = value.value
+                        else:
+                            claims_dict[key] = value
+                    claims_list.append(claims_dict)
+
+                decoded_claims[decoded['elementIdentifier']] = claims_list
+            else:
+                decoded_claims[decoded['elementIdentifier']] = decoded['elementValue']
+
+        return decoded_claims
+
 
     def verify(self) -> bool:
         """"
@@ -159,6 +187,9 @@ class MdocCbor:
                     self.documents.append(mso)
                 else:
                     self.documents_invalid.append(mso)
+
+                for namespace, claims in mso.issuersigned.namespaces.items():
+                    self.disclosure_map[namespace] = self._deode_claims(claims)
 
             except Exception as e:
                 logger.error(
