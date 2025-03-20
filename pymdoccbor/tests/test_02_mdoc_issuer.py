@@ -10,7 +10,7 @@ from pycose.messages import Sign1Message
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.mso.issuer import MsoIssuer
-from . pid_data import PID_DATA
+from pymdoccbor.tests.pid_data import PID_DATA
 
 
 PKEY = {
@@ -75,7 +75,7 @@ def test_mdoc_issuer():
             data=PID_DATA,
             devicekeyinfo=PKEY,
             validity=validity,
-            status_list=status_list
+            revocation=status_list
         )
 
     mdocp = MdocCbor()

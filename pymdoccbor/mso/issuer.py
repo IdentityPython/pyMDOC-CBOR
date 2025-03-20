@@ -43,7 +43,6 @@ class MsoIssuer(MsoX509Fabric):
         hsm: bool = False,
         private_key: Union[dict, CoseKey] = None,
         digest_alg: str = settings.PYMDOC_HASHALG,
-        status_list: dict = None,
         revocation: dict = None
     ) -> None:
         """
@@ -61,8 +60,7 @@ class MsoIssuer(MsoX509Fabric):
         :param hsm: bool: hardware security module
         :param private_key: Union[dict, CoseKey]: the signing key
         :param digest_alg: str: the digest algorithm
-        :param status_list: dict: the status list to include in the mso
-        :param revocation: dict: the status list to include in the mso
+        :param revocation: dict: revocation status dict to include in the mso, it may include status_list and identifier_list keys
         """
 
         if not hsm:
@@ -97,7 +95,6 @@ class MsoIssuer(MsoX509Fabric):
         self.alg = alg
         self.kid = kid
         self.validity = validity
-        self.status_list = status_list
         self.revocation = revocation
 
         alg_map = {"ES256": "sha256", "ES384": "sha384", "ES512": "sha512"}
@@ -206,8 +203,6 @@ class MsoIssuer(MsoX509Fabric):
             },
             "digestAlgorithm": alg_map.get(self.alg)
         }
-        if self.status_list is not None:
-            payload.update({"status": self.status_list})
         if self.revocation is not None:
             payload.update({"status": self.revocation})
 
