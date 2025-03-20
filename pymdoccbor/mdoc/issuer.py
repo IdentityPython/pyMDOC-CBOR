@@ -10,7 +10,7 @@ from typing import Union
 
 from pymdoccbor.mso.issuer import MsoIssuer
 
-from cbor_diag import *
+from cbor_diag import cbor2diag
 
 
 logger = logging.getLogger("pymdoccbor")
