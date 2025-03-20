@@ -2,7 +2,7 @@ import base64
 import binascii
 import cbor2
 import logging
-import datetime
+from datetime import datetime, timezone
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from pycose.keys import CoseKey, EC2Key
@@ -159,7 +159,7 @@ class MdocCborIssuer:
                 revocation=revocation
             )
 
-        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.datetime.now(datetime.UTC))
+        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.now(timezone.utc))
 
         mso_cbor = mso.encode(
             tag=False,
