@@ -6,4 +6,3 @@ isort
 autoflake
 bandit
 autopep8
-pycose~=1.0.1
