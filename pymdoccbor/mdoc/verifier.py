@@ -200,6 +200,8 @@ class MdocCbor:
 
             doc_cnt += 1
 
+        self.status = cdict.get('status', None)
+
         return False if self.documents_invalid else True
 
     def __repr__(self) -> str:
