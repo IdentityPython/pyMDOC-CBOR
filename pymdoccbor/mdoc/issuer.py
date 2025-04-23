@@ -11,6 +11,7 @@ from typing import Union
 from pymdoccbor.mso.issuer import MsoIssuer
 
 from cbor_diag import cbor2diag
+from pymdoccbor.mdoc.exceptions import InvalidStatusDescriptor
 
 
 logger = logging.getLogger("pymdoccbor")
@@ -74,7 +75,8 @@ class MdocCborIssuer:
         validity: dict = None,
         devicekeyinfo: Union[dict, CoseKey, str] = None,
         cert_path: str = None,
-        revocation: dict = None
+        revocation: dict = None,
+        status: dict = None
     ) -> dict:
         """
         create a new mdoc with signed mso
@@ -85,6 +87,7 @@ class MdocCborIssuer:
         :param devicekeyinfo: Union[dict, CoseKey, str]: device key info
         :param cert_path: str: path to the certificate
         :param revocation: dict: revocation status dict it may include status_list and identifier_list keys
+        :param status: dict: status dict that includes the status list's uri and the idx following the "https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list" specification
 
         :return: dict: signed mdoc
         """
@@ -187,6 +190,17 @@ class MdocCborIssuer:
             ],
             "status": self.status,
         }
+
+        if status:
+            if not "status_list" in status:
+                raise InvalidStatusDescriptor("status_list is required")
+
+            if not "uri" in status["status_list"]:
+                raise InvalidStatusDescriptor("uri is required")
+            if not "idx" in status["status_list"]:
+                raise InvalidStatusDescriptor("idx is required")
+
+            res["status"] = status
 
         logger.debug(f"MSO diagnostic notation: {cbor2diag(mso_cbor)}")
 
