@@ -9,3 +9,6 @@ class NoSignedDocumentProvided(Exception):
 
 class MissingIssuerAuth(Exception):
     pass
+
+class InvalidStatusDescriptor(Exception):
+    pass
