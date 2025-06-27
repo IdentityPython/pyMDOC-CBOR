@@ -101,7 +101,10 @@ class MsoIssuer(MsoX509FabricInteface):
 
         alg_map = {"ES256": "sha256", "ES384": "sha384", "ES512": "sha512"}
 
-        hashfunc = getattr(hashlib, alg_map.get(self.alg))
+        if self.alg not in alg_map:
+            raise ValueError(f"Unsupported algorithm: {self.alg}")
+
+        hashfunc = getattr(hashlib, alg_map[self.alg])
 
         digest_cnt = 0
         for ns, values in data.items():
