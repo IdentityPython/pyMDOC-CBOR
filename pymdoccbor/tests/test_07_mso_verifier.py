@@ -1,16 +1,16 @@
 
-import os
-from pycose.keys import CoseKey, EC2Key
 from pymdoccbor.mso.verifier import MsoVerifier
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pycose.messages import CoseMessage
 from pymdoccbor.tests.pkey import PKEY
+from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 mdoc = MdocCborIssuer(
     private_key=PKEY,
     alg="ES256",
+    cert_info=CERT_DATA
 )
 
 mdoc.new(

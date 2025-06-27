@@ -4,11 +4,13 @@ from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.tests.pkey import PKEY
+from pymdoccbor.tests.cert_data import CERT_DATA
 
 def test_mdoc_cbor_creation():
     mdoci = MdocCborIssuer(
         private_key=PKEY,
         alg="ES256",
+        cert_info=CERT_DATA
     )
     mdoc = mdoci.new(
         data=MICOV_DATA,
@@ -46,6 +48,7 @@ def test_mdoc_cbor_invalid_status():
     mdoci = MdocCborIssuer(
         private_key=PKEY,
         alg="ES256",
+        cert_info=CERT_DATA
     )
 
     try:

@@ -11,6 +11,9 @@ from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.mso.issuer import MsoIssuer
 from pymdoccbor.tests.pid_data import PID_DATA
+from pymdoccbor.tests.cert_data import CERT_DATA
+
+from datetime import datetime, timezone, timedelta
 
 
 PKEY = {
@@ -35,7 +38,8 @@ def test_mso_writer():
         data=PID_DATA,
         private_key=PKEY,
         validity=validity,
-        alg = "ES256"
+        alg = "ES256",
+        cert_info=CERT_DATA
     )
 
     assert "eu.europa.ec.eudiw.pid.1" in msoi.hash_map
@@ -57,7 +61,8 @@ def test_mdoc_issuer():
     validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
     mdoci = MdocCborIssuer(
         private_key=PKEY,
-        alg = "ES256"
+        alg = "ES256",
+        cert_info=CERT_DATA
     )
     with open("pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
         fake_cert_file = file.read()

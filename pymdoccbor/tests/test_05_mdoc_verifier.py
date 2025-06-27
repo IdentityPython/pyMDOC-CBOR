@@ -3,6 +3,7 @@ from pymdoccbor.mdoc.verifier import MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
+from pymdoccbor.tests.cert_data import CERT_DATA
 
 def test_verifier_must_fail_document_type():
     try:
@@ -20,6 +21,7 @@ def test_mobile_document():
     mdoc = MdocCborIssuer(
         private_key=PKEY,
         alg="ES256",
+        cert_info=CERT_DATA
     )
     mdoc.new(
         data=MICOV_DATA,
@@ -41,7 +43,8 @@ def test_mobile_document():
 def test_mobile_document_dump():
     mdoc = MdocCborIssuer(
         private_key=PKEY,
-        alg="ES256"
+        alg="ES256",
+        cert_info=CERT_DATA
     )
     mdoc.new(
         data=MICOV_DATA,
@@ -65,7 +68,8 @@ def test_mobile_document_dump():
 def test_mobile_document_dumps():
     mdoc = MdocCborIssuer(
         private_key=PKEY,
-        alg="ES256"
+        alg="ES256",
+        cert_info=CERT_DATA
     )
     mdoc.new(
         data=MICOV_DATA,
@@ -89,7 +93,8 @@ def test_mobile_document_dumps():
 def test_mobile_document_verify():
     mdoc = MdocCborIssuer(
         private_key=PKEY,
-        alg="ES256"
+        alg="ES256",
+        cert_info=CERT_DATA
     )
     mdoc.new(
         data=MICOV_DATA,
