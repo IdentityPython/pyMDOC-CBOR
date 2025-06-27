@@ -5,10 +5,8 @@ import secrets
 import uuid
 import logging
 
-logger = logging.getLogger("pymdoccbor")
-
-from pycose.headers import Algorithm #, KID
-from pycose.keys import CoseKey, EC2Key
+from pycose.keys import CoseKey
+from pycose.headers import Algorithm
 from pycose.messages import Sign1Message
 
 from typing import Union
@@ -22,7 +20,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import Certificate
 
 
-from cbor_diag import *
+logger = logging.getLogger("pymdoccbor")
 
 class MsoIssuer(MsoX509FabricInteface):
     """
@@ -33,17 +31,17 @@ class MsoIssuer(MsoX509FabricInteface):
         self,
         data: dict,
         validity: dict,
-        cert_path: str = None,
-        key_label: str = None,
-        user_pin: str = None,
-        lib_path: str = None,
-        slot_id: int = None,
-        kid: str = None,
-        alg: str = None,
-        hsm: bool = False,
-        private_key: Union[dict, CoseKey] = None,
-        digest_alg: str = settings.PYMDOC_HASHALG,
-        revocation: dict = None
+        cert_path: str | None = None,
+        key_label: str | None = None,
+        user_pin: str | None = None,
+        lib_path: str | None = None,
+        slot_id: int | None = None,
+        kid: str | None = None,
+        alg: str | None = None,
+        hsm: bool | None = False,
+        private_key: dict | CoseKey | None = None,
+        digest_alg: str | None = settings.PYMDOC_HASHALG,
+        revocation: dict | None = None
     ) -> None:
         """
         Initialize a new MsoIssuer
@@ -88,7 +86,7 @@ class MsoIssuer(MsoX509FabricInteface):
         self.hash_map: dict = {}
         self.cert_path = cert_path
         self.disclosure_map: dict = {}
-        self.digest_alg: str = digest_alg
+        self.digest_alg = digest_alg
         self.key_label = key_label
         self.user_pin = user_pin
         self.lib_path = lib_path
@@ -161,9 +159,9 @@ class MsoIssuer(MsoX509FabricInteface):
 
     def sign(
         self,
-        device_key: Union[dict, None] = None,
-        valid_from: Union[None, datetime.datetime] = None,
-        doctype: str = None,
+        device_key: dict | None = None,
+        valid_from: datetime.datetime | None = None,
+        doctype: str | None = None,
     ) -> Sign1Message:
         """
         Sign a mso and returns it
