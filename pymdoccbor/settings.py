@@ -1,7 +1,4 @@
-import datetime
 import os
-
-from datetime import timezone
 
 COSEKEY_HAZMAT_CRV_MAP = {
     "secp256r1": "P_256",
@@ -23,29 +20,7 @@ HASHALG_MAP = {
 
 DIGEST_SALT_LENGTH = 32
 
-
 X509_DER_CERT = os.getenv("X509_DER_CERT", None)
-
-# OR
-
-X509_COUNTRY_NAME           = os.getenv('X509_COUNTRY_NAME', "US")
-X509_STATE_OR_PROVINCE_NAME = os.getenv('X509_STATE_OR_PROVINCE_NAME', "California")
-X509_LOCALITY_NAME          = os.getenv('X509_LOCALITY_NAME', "San Francisco")
-X509_ORGANIZATION_NAME      = os.getenv('X509_ORGANIZATION_NAME', "My Company")
-X509_COMMON_NAME            = os.getenv('X509_COMMON_NAME', "mysite.com")
-
-X509_NOT_VALID_BEFORE       = os.getenv('X509_NOT_VALID_BEFORE', datetime.datetime.now(timezone.utc))
-X509_NOT_VALID_AFTER_DAYS   = os.getenv('X509_NOT_VALID_AFTER_DAYS', 10)
-X509_NOT_VALID_AFTER        = os.getenv(
-    'X509_NOT_VALID_AFTER', 
-    datetime.datetime.now(timezone.utc) + datetime.timedelta(
-        days=X509_NOT_VALID_AFTER_DAYS
-    )
-)
-
-X509_SAN_URL = os.getenv(
-    "X509_SAN_URL", "https://credential-issuer.example.org"
-)
 
 CBORTAGS_ATTR_MAP = {
     "birth_date": 1004,
