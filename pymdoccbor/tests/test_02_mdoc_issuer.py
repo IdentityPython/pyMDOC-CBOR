@@ -12,17 +12,7 @@ from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.mso.issuer import MsoIssuer
 from pymdoccbor.tests.pid_data import PID_DATA
 from pymdoccbor.tests.cert_data import CERT_DATA
-
-from datetime import datetime, timezone, timedelta
-
-
-PKEY = {
-    'KTY': 'EC2',
-    'CURVE': 'P_256',
-    'ALG': 'ES256',
-    'D': os.urandom(32),
-    'KID': b"demo-kid"
-}
+from pymdoccbor.tests.pkey import PKEY, PKEY_ED25519
 
 
 def extract_mso(mdoc:dict):
@@ -53,9 +43,6 @@ def test_mso_writer():
 
     Sign1Message.decode(mso.encode())
 
-    # TODO: assertion about the content
-    #  breakpoint()
-
 
 def test_mdoc_issuer():
     validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
@@ -79,6 +66,49 @@ def test_mdoc_issuer():
             doctype="eu.europa.ec.eudiw.pid.1",
             data=PID_DATA,
             devicekeyinfo=PKEY,
+            validity=validity,
+            revocation=status_list
+        )
+
+    mdocp = MdocCbor()
+    aa = cbor2.dumps(mdoc)
+    mdocp.loads(aa)
+    assert mdocp.verify() is True
+    
+    mdoci.dump()
+    mdoci.dumps()
+
+    # check mso content for status list
+    mso = extract_mso(mdoc)
+    status_list = mso["status"]["status_list"]
+    assert status_list["idx"] == 0
+    assert status_list["uri"] == "https://issuer.com/statuslists"
+    cert_bytes = status_list["certificate"]
+    cert:Certificate = load_der_x509_certificate(cert_bytes)
+    assert "Test ASL Issuer" in cert.subject.rfc4514_string(), "ASL is not signed with the expected certificate"
+
+def test_mdoc_issuer_EdDSA():
+    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
+    mdoci = MdocCborIssuer(
+        private_key=PKEY,
+        alg = "ES256",
+        cert_info=CERT_DATA
+    )
+    with open("pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
+        fake_cert_file = file.read()
+        asl_signing_cert = x509.load_pem_x509_certificate(fake_cert_file)
+        _asl_signing_cert = asl_signing_cert.public_bytes(getattr(serialization.Encoding, "DER"))
+        status_list = {
+            "status_list": {
+                "idx": 0,
+                "uri": "https://issuer.com/statuslists",
+                "certificate": _asl_signing_cert,
+            }
+        }
+        mdoc = mdoci.new(
+            doctype="eu.europa.ec.eudiw.pid.1",
+            data=PID_DATA,
+            devicekeyinfo=PKEY_ED25519,
             validity=validity,
             revocation=status_list
         )
