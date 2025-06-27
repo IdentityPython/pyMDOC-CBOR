@@ -1,6 +1,8 @@
 from cwt import COSEKey
 from typing import Union
 
+from pycose.keys import CoseKey
+
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.x509 import Certificate
@@ -13,6 +15,14 @@ class MsoX509FabricInteface:
     MsoX509Fabric helper class to create a new mso
     """
 
+    def __init__(self, private_key: CoseKey | None) -> None:
+        """
+        Initialize the MsoX509Fabric object
+
+        :param private_key: str: the private key in COSE format
+        """
+        self.private_key = private_key
+        
     def selfsigned_x509cert(self, encoding: str = "DER") -> Union[Certificate, bytes]:
         """
         Returns an X.509 certificate derived from the private key of the MSO Issuer
@@ -21,6 +31,10 @@ class MsoX509FabricInteface:
 
         :return: Union[Certificate, bytes]: the X.509 certificate
         """
+
+        if not self.private_key:
+            raise ValueError("private_key must be set")
+
         ckey = COSEKey.from_bytes(self.private_key.encode())
 
         subject = issuer = x509.Name([

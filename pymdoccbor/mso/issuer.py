@@ -63,18 +63,20 @@ class MsoIssuer(MsoX509FabricInteface):
         :param revocation: dict: revocation status dict to include in the mso, it may include status_list and identifier_list keys
         """
 
-        if not hsm:
-            if private_key:
-                if isinstance(private_key, dict):
-                    self.private_key = CoseKey.from_dict(private_key)
-                    if not self.private_key.kid:
-                        self.private_key.kid = str(uuid.uuid4())
-                elif isinstance(private_key, CoseKey):
-                    self.private_key = private_key
-                else:
-                    raise ValueError("private_key must be a dict or CoseKey object")
+        if private_key:
+            if isinstance(private_key, dict):
+                self.private_key = CoseKey.from_dict(private_key)
+                if not self.private_key.kid:
+                    self.private_key.kid = str(uuid.uuid4())
+            elif isinstance(private_key, CoseKey):
+                self.private_key = private_key
             else:
+                raise ValueError("private_key must be a dict or CoseKey object")
+        else:
+            if not hsm:
                 raise MsoPrivateKeyRequired("MSO Writer requires a valid private key")
+
+        super().__init__(self.private_key)
 
         if not validity:
             raise ValueError("validity must be present")
