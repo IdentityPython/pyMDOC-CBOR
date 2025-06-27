@@ -13,7 +13,7 @@ from typing import Union
 
 from pymdoccbor.exceptions import MsoPrivateKeyRequired
 from pymdoccbor import settings
-from pymdoccbor.x509 import MsoX509FabricInteface
+from pymdoccbor.x509 import selfsigned_x509cert
 from pymdoccbor.tools import shuffle_dict
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
@@ -22,7 +22,7 @@ from cryptography.x509 import Certificate
 
 logger = logging.getLogger("pymdoccbor")
 
-class MsoIssuer(MsoX509FabricInteface):
+class MsoIssuer:
     """
     MsoIssuer helper class to create a new mso
     """
@@ -41,7 +41,8 @@ class MsoIssuer(MsoX509FabricInteface):
         hsm: bool | None = False,
         private_key: dict | CoseKey | None = None,
         digest_alg: str | None = settings.PYMDOC_HASHALG,
-        revocation: dict | None = None
+        revocation: dict | None = None,
+        cert_info: dict | None = None,
     ) -> None:
         """
         Initialize a new MsoIssuer
@@ -74,8 +75,6 @@ class MsoIssuer(MsoX509FabricInteface):
             if not hsm:
                 raise MsoPrivateKeyRequired("MSO Writer requires a valid private key")
 
-        super().__init__(self.private_key)
-
         if not validity:
             raise ValueError("validity must be present")
 
@@ -84,7 +83,6 @@ class MsoIssuer(MsoX509FabricInteface):
 
         self.data: dict = data
         self.hash_map: dict = {}
-        self.cert_path = cert_path
         self.disclosure_map: dict = {}
         self.digest_alg = digest_alg
         self.key_label = key_label
@@ -96,6 +94,14 @@ class MsoIssuer(MsoX509FabricInteface):
         self.kid = kid
         self.validity = validity
         self.revocation = revocation
+
+        self.cert_path = cert_path
+        self.cert_info = cert_info
+
+        if not self.cert_path and (not self.cert_info or not self.private_key):
+            raise ValueError(
+                "cert_path or cert_info with a private key must be provided to properly insert a certificate"
+            )
 
         alg_map = {"ES256": "sha256", "ES384": "sha384", "ES512": "sha512"}
 
@@ -232,7 +238,10 @@ class MsoIssuer(MsoX509FabricInteface):
                 raise Exception(f"Certificate at {self.cert_path} failed parse")
             _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
         else:
-            _cert = self.selfsigned_x509cert()
+            if not self.cert_info:
+                raise ValueError("cert_info must be provided if cert_path is not set")
+            
+            _cert = selfsigned_x509cert(self.cert_info, self.private_key)
 
         if self.hsm:
             # print("payload diganostic notation: \n",cbor2diag(cbor2.dumps(cbor2.CBORTag(24, cbor2.dumps(payload)))))

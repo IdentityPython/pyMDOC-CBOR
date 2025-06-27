@@ -31,6 +31,7 @@ class MdocCborIssuer:
         alg: str = None,
         kid: str = None,
         private_key: Union[dict, CoseKey] = {},
+        cert_info: dict | None = None,
     ):
         """
         Initialize a new MdocCborIssuer
@@ -67,6 +68,7 @@ class MdocCborIssuer:
         self.hsm = hsm
         self.alg = alg
         self.kid = kid
+        self.cert_info = cert_info
 
     def new(
         self,
@@ -149,7 +151,8 @@ class MdocCborIssuer:
                 alg=self.alg,
                 kid=self.kid,
                 validity=validity,
-                revocation=revocation
+                revocation=revocation,
+                cert_info=self.cert_info
             )
 
         else:
@@ -159,7 +162,8 @@ class MdocCborIssuer:
                 alg=self.alg,
                 cert_path=cert_path,
                 validity=validity,
-                revocation=revocation
+                revocation=revocation,
+                cert_info=self.cert_info
             )
 
         mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.now(timezone.utc))
