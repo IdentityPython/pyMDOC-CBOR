@@ -15,7 +15,7 @@ from typing import Union
 
 from pymdoccbor.exceptions import MsoPrivateKeyRequired
 from pymdoccbor import settings
-from pymdoccbor.x509 import MsoX509Fabric
+from pymdoccbor.x509 import MsoX509FabricInteface
 from pymdoccbor.tools import shuffle_dict
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
@@ -24,8 +24,7 @@ from cryptography.x509 import Certificate
 
 from cbor_diag import *
 
-
-class MsoIssuer(MsoX509Fabric):
+class MsoIssuer(MsoX509FabricInteface):
     """
     MsoIssuer helper class to create a new mso
     """

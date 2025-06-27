@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 
 from pymdoccbor import settings
 
-class MsoX509Fabric:
+class MsoX509FabricInteface:
     """
     MsoX509Fabric helper class to create a new mso
     """
