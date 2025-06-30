@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from pycose.keys import CoseKey, EC2Key
 from typing import Union
 
@@ -109,6 +110,14 @@ class MdocCborIssuer:
                     -1: devicekeyinfoCoseKeyObject.crv.identifier,
                     -2: devicekeyinfoCoseKeyObject.x,
                 }
+            elif devicekeyinfoCoseKeyObject.kty.identifier == 3:  # RSAKey
+                devicekeyinfo = {
+                    1: devicekeyinfoCoseKeyObject.kty.identifier,
+                    -1: devicekeyinfoCoseKeyObject.n,
+                    -2: devicekeyinfoCoseKeyObject.e,
+                }
+            else:
+                raise TypeError("Unsupported key type in devicekeyinfo")
         if isinstance(devicekeyinfo, str):
             device_key_bytes = base64.urlsafe_b64decode(devicekeyinfo.encode("utf-8"))
             public_key = serialization.load_pem_public_key(device_key_bytes)
@@ -152,6 +161,18 @@ class MdocCborIssuer:
                     -2: public_key.public_bytes(
                         encoding=serialization.Encoding.Raw,
                         format=serialization.PublicFormat.Raw
+                    )
+                }
+            elif isinstance(public_key, RSAPublicKey):
+                devicekeyinfo = {
+                    1: 3,  # RSAKey
+                    -1: public_key.public_numbers().n.to_bytes(
+                        (public_key.public_numbers().n.bit_length() + 7) // 8,
+                        "big"
+                    ),
+                    -2: public_key.public_numbers().e.to_bytes(
+                        (public_key.public_numbers().e.bit_length() + 7) // 8,
+                        "big"
                     )
                 }
             else:
