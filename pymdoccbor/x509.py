@@ -1,4 +1,3 @@
-from cwt import COSEKey
 from typing import Union
 
 from pycose.keys import CoseKey
@@ -8,6 +7,7 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.x509 import Certificate
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 
 def selfsigned_x509cert(cert_info: dict[str, Any], private_key: CoseKey, encoding: str = "DER") -> Union[Certificate, bytes]:
     """
@@ -31,8 +31,24 @@ def selfsigned_x509cert(cert_info: dict[str, Any], private_key: CoseKey, encodin
 
     if not private_key:
         raise ValueError("private_key must be set")
+    
+    # convert the private key to a cryptography private key instance
+    if hasattr(private_key, "kty") and private_key.kty is not None and hasattr(private_key.kty, "identifier"):
+        if private_key.kty.identifier == 2:  # EC2Key
+            private_key_inst = ec.derive_private_key(
+                int.from_bytes(private_key['d'], byteorder="big"), ec.SECP256R1()
+            )
+        elif private_key.kty.identifier == 1: # OKPKey
+            private_key_inst = ed25519.Ed25519PrivateKey.from_private_bytes(
+                private_key['d']
+            )
+        else:
+            raise ValueError(f"Unsupported key type: {private_key.kty}")
+    else:
+        raise ValueError("private_key.kty or private_key.kty.identifier is not set or unknown")
+    
 
-    ckey = COSEKey.from_bytes(private_key.encode())
+    public_key_inst = private_key_inst.public_key()
 
     name_attributes = []
     if "country_name" in cert_info:
@@ -53,7 +69,7 @@ def selfsigned_x509cert(cert_info: dict[str, Any], private_key: CoseKey, encodin
     ).issuer_name(
         issuer
     ).public_key(
-        ckey.key.public_key()
+        public_key_inst
     ).serial_number(
         x509.random_serial_number()
     )
@@ -82,7 +98,7 @@ def selfsigned_x509cert(cert_info: dict[str, Any], private_key: CoseKey, encodin
             # Sign our certificate with our private key
         )
     
-    cert = cert_builder.sign(ckey.key, hashes.SHA256())
+    cert = cert_builder.sign(private_key_inst, hashes.SHA256())
 
     if not encoding:
         return cert
