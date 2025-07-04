@@ -241,6 +241,10 @@ class MsoIssuer:
             if not self.cert_info:
                 raise ValueError("cert_info must be provided if cert_path is not set")
             
+            logger.warning(
+                "A self-signed certificate will be created using the provided cert_info but this is not recommended for production use."
+            )
+            
             _cert = selfsigned_x509cert(self.cert_info, self.private_key)
 
         if self.hsm:
