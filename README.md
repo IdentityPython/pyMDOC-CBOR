@@ -2,8 +2,6 @@
 
 Python parser and writer for EUDI Wallet MDOC CBOR for credential Type 1 and also or mDL use cases.
 
-> This project is an experimental proposal born for educational purposes. Please do not consider it as usable before the release 0.6.0.
-
 ## Specifications and Resources
 
 - [ISO 18013-5 - ISO-compliant driving licence — Mobile driving licence (mDL) application](https://www.iso.org/standard/69084.html)
