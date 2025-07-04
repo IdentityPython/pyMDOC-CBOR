@@ -37,7 +37,6 @@ setup(
     include_package_data=True,
     install_requires=[
         "cbor2>=5.4.0,<5.5.0",
-        "cwt>=2.3.0,<2.4",
         "cbor-diag>=1.1.0,<1.2",
         "pycose>=1.0.1"
     ],

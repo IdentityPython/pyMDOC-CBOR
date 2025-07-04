@@ -3,11 +3,13 @@ from pymdoccbor.mdoc.issuersigned import IssuerSigned
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
+from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 mdoc = MdocCborIssuer(
     private_key=PKEY,
     alg="ES256",
+    cert_info=CERT_DATA
 )
 mdoc.new(
     data=MICOV_DATA,

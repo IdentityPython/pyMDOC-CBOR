@@ -5,6 +5,8 @@ import logging
 from datetime import datetime, timezone
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from pycose.keys import CoseKey, EC2Key
 from typing import Union
 
@@ -23,14 +25,15 @@ class MdocCborIssuer:
     """
     def __init__(
         self,
-        key_label: str = None,
-        user_pin: str = None,
-        lib_path: str = None,
-        slot_id: int = None,
+        key_label: str | None = None,
+        user_pin: str | None = None,
+        lib_path: str | None = None,
+        slot_id: int | None = None,
         hsm: bool = False,
-        alg: str = None,
-        kid: str = None,
+        alg: str | None = None,
+        kid: str | None = None,
         private_key: Union[dict, CoseKey] = {},
+        cert_info: dict | None = None,
     ):
         """
         Initialize a new MdocCborIssuer
@@ -67,16 +70,17 @@ class MdocCborIssuer:
         self.hsm = hsm
         self.alg = alg
         self.kid = kid
+        self.cert_info = cert_info
 
     def new(
         self,
         data: dict,
         doctype: str,
-        validity: dict = None,
-        devicekeyinfo: Union[dict, CoseKey, str] = None,
-        cert_path: str = None,
-        revocation: dict = None,
-        status: dict = None
+        validity: dict | None = None,
+        devicekeyinfo: dict | CoseKey | str | None = None,
+        cert_path: str | None = None,
+        revocation: dict | None = None,
+        status: dict | None = None
     ) -> dict:
         """
         create a new mdoc with signed mso
@@ -93,49 +97,86 @@ class MdocCborIssuer:
         """
         if isinstance(devicekeyinfo, dict):
             devicekeyinfoCoseKeyObject = CoseKey.from_dict(devicekeyinfo)
-            devicekeyinfo = {
-                1: devicekeyinfoCoseKeyObject.kty.identifier,
-                -1: devicekeyinfoCoseKeyObject.crv.identifier,
-                -2: devicekeyinfoCoseKeyObject.x,
-                -3: devicekeyinfoCoseKeyObject.y,
-            }
+            if devicekeyinfoCoseKeyObject.kty.identifier == 2:  # EC2Key
+                devicekeyinfo = {
+                    1: devicekeyinfoCoseKeyObject.kty.identifier,
+                    -1: devicekeyinfoCoseKeyObject.crv.identifier,
+                    -2: devicekeyinfoCoseKeyObject.x,
+                    -3: devicekeyinfoCoseKeyObject.y,
+                }
+            elif devicekeyinfoCoseKeyObject.kty.identifier == 1:  # OKPKey
+                devicekeyinfo = {
+                    1: devicekeyinfoCoseKeyObject.kty.identifier,
+                    -1: devicekeyinfoCoseKeyObject.crv.identifier,
+                    -2: devicekeyinfoCoseKeyObject.x,
+                }
+            elif devicekeyinfoCoseKeyObject.kty.identifier == 3:  # RSAKey
+                devicekeyinfo = {
+                    1: devicekeyinfoCoseKeyObject.kty.identifier,
+                    -1: devicekeyinfoCoseKeyObject.n,
+                    -2: devicekeyinfoCoseKeyObject.e,
+                }
+            else:
+                raise TypeError("Unsupported key type in devicekeyinfo")
         if isinstance(devicekeyinfo, str):
             device_key_bytes = base64.urlsafe_b64decode(devicekeyinfo.encode("utf-8"))
-            public_key:EllipticCurvePublicKey = serialization.load_pem_public_key(device_key_bytes)
-            curve_name = public_key.curve.name
-            curve_map = {
-                "secp256r1": 1,  # NIST P-256
-                "secp384r1": 2,  # NIST P-384
-                "secp521r1": 3,  # NIST P-521
-                "brainpoolP256r1": 8,  # Brainpool P-256
-                "brainpoolP384r1": 9,  # Brainpool P-384
-                "brainpoolP512r1": 10,  # Brainpool P-512
-                # Add more curve mappings as needed
-            }
-            curve_identifier = curve_map.get(curve_name)
+            public_key = serialization.load_pem_public_key(device_key_bytes)
+            
+            if isinstance(public_key, EllipticCurvePublicKey):
+                curve_name = public_key.curve.name
+                curve_map = {
+                    "secp256r1": 1,  # NIST P-256
+                    "secp384r1": 2,  # NIST P-384
+                    "secp521r1": 3,  # NIST P-521
+                    "brainpoolP256r1": 8,  # Brainpool P-256
+                    "brainpoolP384r1": 9,  # Brainpool P-384
+                    "brainpoolP512r1": 10,  # Brainpool P-512
+                    # Add more curve mappings as needed
+                }
+                curve_identifier = curve_map.get(curve_name)
 
-            # Extract the x and y coordinates from the public key
-            x = public_key.public_numbers().x.to_bytes(
-                (public_key.public_numbers().x.bit_length() + 7)
-                // 8,  # Number of bytes needed
-                "big",  # Byte order
-            )
+                # Extract the x and y coordinates from the public key
+                x = public_key.public_numbers().x.to_bytes(
+                    (public_key.public_numbers().x.bit_length() + 7)
+                    // 8,  # Number of bytes needed
+                    "big",  # Byte order
+                )
 
-            y = public_key.public_numbers().y.to_bytes(
-                (public_key.public_numbers().y.bit_length() + 7)
-                // 8,  # Number of bytes needed
-                "big",  # Byte order
-            )
+                y = public_key.public_numbers().y.to_bytes(
+                    (public_key.public_numbers().y.bit_length() + 7)
+                    // 8,  # Number of bytes needed
+                    "big",  # Byte order
+                )
 
-            devicekeyinfo = {
-                1: 2,
-                -1: curve_identifier,
-                -2: x,
-                -3: y,
-            }
-
-        else:
-            devicekeyinfo: CoseKey = devicekeyinfo
+                devicekeyinfo = {
+                    1: 2,
+                    -1: curve_identifier,
+                    -2: x,
+                    -3: y,
+                }
+            elif isinstance(public_key, Ed25519PublicKey):
+                devicekeyinfo = {
+                    1: 1,  # OKPKey
+                    -1: "Ed25519",  # Curve identifier for Ed25519
+                    -2: public_key.public_bytes(
+                        encoding=serialization.Encoding.Raw,
+                        format=serialization.PublicFormat.Raw
+                    )
+                }
+            elif isinstance(public_key, RSAPublicKey):
+                devicekeyinfo = {
+                    1: 3,  # RSAKey
+                    -1: public_key.public_numbers().n.to_bytes(
+                        (public_key.public_numbers().n.bit_length() + 7) // 8,
+                        "big"
+                    ),
+                    -2: public_key.public_numbers().e.to_bytes(
+                        (public_key.public_numbers().e.bit_length() + 7) // 8,
+                        "big"
+                    )
+                }
+            else:
+                raise TypeError("Loaded public key is not an EllipticCurvePublicKey")
 
         if self.hsm:
             msoi = MsoIssuer(
@@ -149,7 +190,8 @@ class MdocCborIssuer:
                 alg=self.alg,
                 kid=self.kid,
                 validity=validity,
-                revocation=revocation
+                revocation=revocation,
+                cert_info=self.cert_info
             )
 
         else:
@@ -159,10 +201,11 @@ class MdocCborIssuer:
                 alg=self.alg,
                 cert_path=cert_path,
                 validity=validity,
-                revocation=revocation
+                revocation=revocation,
+                cert_info=self.cert_info
             )
 
-        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo,valid_from=datetime.now(timezone.utc))
+        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo, valid_from=datetime.now(timezone.utc))
 
         mso_cbor = mso.encode(
             tag=False,

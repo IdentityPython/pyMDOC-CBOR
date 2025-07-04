@@ -5,27 +5,24 @@ import secrets
 import uuid
 import logging
 
-logger = logging.getLogger("pymdoccbor")
-
-from pycose.headers import Algorithm #, KID
-from pycose.keys import CoseKey, EC2Key
+from pycose.keys import CoseKey
+from pycose.headers import Algorithm
 from pycose.messages import Sign1Message
 
 from typing import Union
 
 from pymdoccbor.exceptions import MsoPrivateKeyRequired
 from pymdoccbor import settings
-from pymdoccbor.x509 import MsoX509Fabric
+from pymdoccbor.x509 import selfsigned_x509cert
 from pymdoccbor.tools import shuffle_dict
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import Certificate
 
 
-from cbor_diag import *
+logger = logging.getLogger("pymdoccbor")
 
-
-class MsoIssuer(MsoX509Fabric):
+class MsoIssuer:
     """
     MsoIssuer helper class to create a new mso
     """
@@ -34,17 +31,18 @@ class MsoIssuer(MsoX509Fabric):
         self,
         data: dict,
         validity: dict,
-        cert_path: str = None,
-        key_label: str = None,
-        user_pin: str = None,
-        lib_path: str = None,
-        slot_id: int = None,
-        kid: str = None,
-        alg: str = None,
-        hsm: bool = False,
-        private_key: Union[dict, CoseKey] = None,
-        digest_alg: str = settings.PYMDOC_HASHALG,
-        revocation: dict = None
+        cert_path: str | None = None,
+        key_label: str | None = None,
+        user_pin: str | None = None,
+        lib_path: str | None = None,
+        slot_id: int | None = None,
+        kid: str | None = None,
+        alg: str | None = None,
+        hsm: bool | None = False,
+        private_key: dict | CoseKey | None = None,
+        digest_alg: str | None = settings.PYMDOC_HASHALG,
+        revocation: dict | None = None,
+        cert_info: dict | None = None,
     ) -> None:
         """
         Initialize a new MsoIssuer
@@ -64,17 +62,17 @@ class MsoIssuer(MsoX509Fabric):
         :param revocation: dict: revocation status dict to include in the mso, it may include status_list and identifier_list keys
         """
 
-        if not hsm:
-            if private_key:
-                if isinstance(private_key, dict):
-                    self.private_key = CoseKey.from_dict(private_key)
-                    if not self.private_key.kid:
-                        self.private_key.kid = str(uuid.uuid4())
-                elif isinstance(private_key, CoseKey):
-                    self.private_key = private_key
-                else:
-                    raise ValueError("private_key must be a dict or CoseKey object")
+        if private_key:
+            if isinstance(private_key, dict):
+                self.private_key = CoseKey.from_dict(private_key)
+                if not self.private_key.kid:
+                    self.private_key.kid = str(uuid.uuid4())
+            elif isinstance(private_key, CoseKey):
+                self.private_key = private_key
             else:
+                raise ValueError("private_key must be a dict or CoseKey object")
+        else:
+            if not hsm:
                 raise MsoPrivateKeyRequired("MSO Writer requires a valid private key")
 
         if not validity:
@@ -85,9 +83,8 @@ class MsoIssuer(MsoX509Fabric):
 
         self.data: dict = data
         self.hash_map: dict = {}
-        self.cert_path = cert_path
         self.disclosure_map: dict = {}
-        self.digest_alg: str = digest_alg
+        self.digest_alg = digest_alg
         self.key_label = key_label
         self.user_pin = user_pin
         self.lib_path = lib_path
@@ -98,9 +95,20 @@ class MsoIssuer(MsoX509Fabric):
         self.validity = validity
         self.revocation = revocation
 
+        self.cert_path = cert_path
+        self.cert_info = cert_info
+
+        if not self.cert_path and (not self.cert_info or not self.private_key):
+            raise ValueError(
+                "cert_path or cert_info with a private key must be provided to properly insert a certificate"
+            )
+
         alg_map = {"ES256": "sha256", "ES384": "sha384", "ES512": "sha512"}
 
-        hashfunc = getattr(hashlib, alg_map.get(self.alg))
+        if self.alg not in alg_map:
+            raise ValueError(f"Unsupported algorithm: {self.alg}")
+
+        hashfunc = getattr(hashlib, alg_map[self.alg])
 
         digest_cnt = 0
         for ns, values in data.items():
@@ -157,9 +165,9 @@ class MsoIssuer(MsoX509Fabric):
 
     def sign(
         self,
-        device_key: Union[dict, None] = None,
-        valid_from: Union[None, datetime.datetime] = None,
-        doctype: str = None,
+        device_key: dict | None = None,
+        valid_from: datetime.datetime | None = None,
+        doctype: str | None = None,
     ) -> Sign1Message:
         """
         Sign a mso and returns it
@@ -230,7 +238,14 @@ class MsoIssuer(MsoX509Fabric):
                 raise Exception(f"Certificate at {self.cert_path} failed parse")
             _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
         else:
-            _cert = self.selfsigned_x509cert()
+            if not self.cert_info:
+                raise ValueError("cert_info must be provided if cert_path is not set")
+            
+            logger.warning(
+                "A self-signed certificate will be created using the provided cert_info but this is not recommended for production use."
+            )
+            
+            _cert = selfsigned_x509cert(self.cert_info, self.private_key)
 
         if self.hsm:
             # print("payload diganostic notation: \n",cbor2diag(cbor2.dumps(cbor2.CBORTag(24, cbor2.dumps(payload)))))

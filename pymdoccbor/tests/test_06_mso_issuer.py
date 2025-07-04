@@ -3,6 +3,7 @@ from pycose.messages import CoseMessage
 from pymdoccbor.mso.issuer import MsoIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
+from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 def test_mso_issuer_fail():
@@ -19,7 +20,8 @@ def test_mso_issuer_creation():
             "issuance_date": "2024-12-31",
             "expiry_date": "2050-12-31"
         },
-        alg="ES256"
+        alg="ES256",
+        cert_info=CERT_DATA
     )
 
     assert msoi.private_key
@@ -36,7 +38,8 @@ def test_mso_issuer_sign():
             "issuance_date": "2024-12-31",
             "expiry_date": "2050-12-31"
         },
-        alg="ES256"
+        alg="ES256",
+        cert_info=CERT_DATA
     )
 
     mso = msoi.sign()
