@@ -5,7 +5,7 @@ import logging
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
 
-from typing import Union
+from typing import Union, Any
 
 from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
@@ -75,15 +75,31 @@ class MsoVerifier:
         )
 
     @property
-    def raw_public_keys(self) -> bytes:
+    def raw_public_keys(self) -> list[Any]:
         """
             it returns the public key extract from x509 certificates
             looking to both phdr and uhdr
         """
-        _mixed_heads = self.object.phdr.items() | self.object.uhdr.items()
+        # _mixed_heads = self.object.phdr.items() | self.object.uhdr.items()
+
+        merged = self.object.phdr.copy()
+        merged.update(self.object.uhdr)
+        _mixed_heads = merged.items()
         for h, v in _mixed_heads:
             if h.identifier == 33:
-                return list(self.object.uhdr.values())
+                # return list(self.object.uhdr.values())
+                if isinstance(v, bytes):
+                    return [v]
+                elif isinstance(v, list):
+                    return v
+                elif isinstance(v, dict):
+                    return [v]
+                else:
+                    logger.warning(
+                        f"Unexpected type for public key: {type(v)}. "
+                        "Expected bytes, list or dict."
+                    )
+                    continue
 
         raise MsoX509ChainNotFound(
             "I can't find any valid X509certs, identified by label number 33, "
