@@ -5,7 +5,7 @@ import logging
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
 
-from typing import Union
+from typing import Union, Any
 
 from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
@@ -75,15 +75,37 @@ class MsoVerifier:
         )
 
     @property
-    def raw_public_keys(self) -> bytes:
+    def raw_public_keys(self) -> list[Union[bytes, dict]]:
         """
-            it returns the public key extract from x509 certificates
-            looking to both phdr and uhdr
+            Extracts public keys from x509 certificates found in the MSO.
+            This method searches for x509 certificates in both the protected header (phdr)
+            and unprotected header (uhdr) of the COSE_Sign1 object. It handles certificate
+            data in various formats, including:
+            - `bytes`: Returns a list containing the raw bytes of the certificate.
+            - `list`: Returns the list of certificates as-is.
+            - `dict`: Wraps the dictionary in a list and returns it.
+            If no valid x509 certificates are found, an `MsoX509ChainNotFound` exception
+            is raised. Unexpected types are logged as warnings.
+            :return: list[Any]: A list of certificates in their respective formats.
+            :raises MsoX509ChainNotFound: If no x509 certificates are found.
         """
-        _mixed_heads = self.object.phdr.items() | self.object.uhdr.items()
+        merged = self.object.phdr.copy()
+        merged.update(self.object.uhdr)
+        _mixed_heads = merged.items()
         for h, v in _mixed_heads:
             if h.identifier == 33:
-                return list(self.object.uhdr.values())
+                if isinstance(v, bytes):
+                    return [v]
+                elif isinstance(v, list):
+                    return v
+                elif isinstance(v, dict):
+                    return [v]
+                else:
+                    logger.warning(
+                        f"Unexpected type for public key: {type(v)}. "
+                        "Expected bytes, list or dict."
+                    )
+                    continue
 
         raise MsoX509ChainNotFound(
             "I can't find any valid X509certs, identified by label number 33, "
