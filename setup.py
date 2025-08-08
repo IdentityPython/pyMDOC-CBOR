@@ -35,9 +35,5 @@ setup(
     # scripts=[f'{_pkg_name}/bin/{_pkg_name}'],
     packages=find_packages(include=["pymdoccbor", "pymdoccbor.*"]),
     include_package_data=True,
-    install_requires=[
-        "cbor2>=5.4.0,<5.5.0",
-        "cbor-diag>=1.1.0,<1.2",
-        "pycose>=1.0.1"
-    ],
+    install_requires=["cbor2>=5.4.0", "cbor-diag>=1.1.0,<1.2", "pycose>=1.0.1"],
 )

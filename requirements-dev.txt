@@ -7,4 +7,4 @@ autoflake
 bandit
 autopep8
 pycose>=1.0.1
-cbor2>=5.4.0,<5.5.0
+cbor2>=5.4.0
