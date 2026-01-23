@@ -21,13 +21,14 @@ class MobileDocument:
         False: "failed",
     }
 
-    def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}) -> None:
+    def __init__(self, docType: str, issuerSigned: dict, deviceSigned: dict = {}, errors: dict = None) -> None:
         """
         Initialize the MobileDocument object
 
         :param docType: str: the document type
         :param issuerSigned: dict: the issuerSigned info
         :param deviceSigned: dict: the deviceSigned info
+        :param errors: dict: optional errors field (ISO 18013-5 status != 0)
         """
 
         if not docType:
@@ -41,18 +42,8 @@ class MobileDocument:
         self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
         self.is_valid = False
         self.devicesigned: dict = deviceSigned
+        self.errors: dict = errors if errors is not None else {}
 
-    def dump(self) -> dict:
-        """
-        It returns the document as a dict
-
-        :return: dict: the document as a dict
-        """
-        return {
-            'docType': self.doctype,
-            'issuerSigned': self.issuersigned.dump()
-        }
-    
     def dumps(self) -> bytes:
         """
         It returns the AF binary repr as bytes
@@ -67,13 +58,19 @@ class MobileDocument:
 
         :return: dict: the document as bytes
         """
+        doc_dict = {
+            'docType': self.doctype,
+            'issuerSigned': self.issuersigned.dumps()
+        }
+        
+        # Include errors field if present (ISO 18013-5 status != 0)
+        if self.errors:
+            doc_dict['errors'] = self.errors
+        
         return cbor2.dumps(
             cbor2.CBORTag(
                 24, 
-                value={
-                    'docType': self.doctype,
-                    'issuerSigned': self.issuersigned.dumps()
-                }
+                value=doc_dict
             )
         )
 
@@ -148,6 +145,12 @@ class MdocCbor:
                 claims_list = []
 
                 for element in decoded['elementValue']:
+                    # Handle simple values in lists (strings, numbers, etc.)
+                    if not isinstance(element, dict):
+                        claims_list.append(element)
+                        continue
+                    
+                    # Handle dict elements
                     claims_dict = {}
                     for key, value in element.items():
                         if isinstance(value, cbor2.CBORTag):
