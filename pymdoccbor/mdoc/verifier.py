@@ -145,6 +145,12 @@ class MdocCbor:
                 claims_list = []
 
                 for element in decoded['elementValue']:
+                    # Handle simple values in lists (strings, numbers, etc.)
+                    if not isinstance(element, dict):
+                        claims_list.append(element)
+                        continue
+                    
+                    # Handle dict elements
                     claims_dict = {}
                     for key, value in element.items():
                         if isinstance(value, cbor2.CBORTag):
