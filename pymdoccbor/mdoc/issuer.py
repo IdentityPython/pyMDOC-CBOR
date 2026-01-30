@@ -23,6 +23,7 @@ class MdocCborIssuer:
     """
     MdocCborIssuer helper class to create a new mdoc
     """
+
     def __init__(
         self,
         key_label: str | None = None,
@@ -121,7 +122,7 @@ class MdocCborIssuer:
         if isinstance(devicekeyinfo, str):
             device_key_bytes = base64.urlsafe_b64decode(devicekeyinfo.encode("utf-8"))
             public_key = serialization.load_pem_public_key(device_key_bytes)
-            
+
             if isinstance(public_key, EllipticCurvePublicKey):
                 curve_name = public_key.curve.name
                 curve_map = {
@@ -161,18 +162,16 @@ class MdocCborIssuer:
                     -2: public_key.public_bytes(
                         encoding=serialization.Encoding.Raw,
                         format=serialization.PublicFormat.Raw
-                    )
+                    ),
                 }
             elif isinstance(public_key, RSAPublicKey):
                 devicekeyinfo = {
                     1: 3,  # RSAKey
                     -1: public_key.public_numbers().n.to_bytes(
-                        (public_key.public_numbers().n.bit_length() + 7) // 8,
-                        "big"
+                        (public_key.public_numbers().n.bit_length() + 7) // 8, "big"
                     ),
                     -2: public_key.public_numbers().e.to_bytes(
-                        (public_key.public_numbers().e.bit_length() + 7) // 8,
-                        "big"
+                        (public_key.public_numbers().e.bit_length() + 7) // 8, "big"
                     )
                 }
             else:
@@ -205,7 +204,11 @@ class MdocCborIssuer:
                 cert_info=self.cert_info
             )
 
-        mso = msoi.sign(doctype=doctype, device_key=devicekeyinfo, valid_from=datetime.now(timezone.utc))
+        mso = msoi.sign(
+            doctype=doctype,
+            device_key=devicekeyinfo,
+            valid_from=datetime.now(timezone.utc)
+        )
 
         mso_cbor = mso.encode(
             tag=False,
@@ -216,18 +219,17 @@ class MdocCborIssuer:
             slot_id=self.slot_id,
         )
 
-
         res = {
             "version": self.version,
             "documents": [
                 {
-                "docType": doctype,  # 'org.iso.18013.5.1.mDL'
-                "issuerSigned": {
-                    "nameSpaces": {
-                        ns: [v for k, v in dgst.items()]
-                        for ns, dgst in msoi.disclosure_map.items()
+                    "docType": doctype,  # 'org.iso.18013.5.1.mDL'
+                    "issuerSigned": {
+                        "nameSpaces": {
+                            ns: [v for k, v in dgst.items()]
+                            for ns, dgst in msoi.disclosure_map.items()
                         },
-                    "issuerAuth": cbor2.decoder.loads(mso_cbor),
+                        "issuerAuth": cbor2.loads(mso_cbor)
                     },
                 }
             ],
