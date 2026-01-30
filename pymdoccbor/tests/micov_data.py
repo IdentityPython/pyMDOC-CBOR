@@ -1,5 +1,5 @@
 MICOV_DATA = {
-    "org.micov.medical.1":{
+    "org.micov.medical.1": {
         "last_name": "Rossi",
         "given_name": "Mario",
         "birth_date": "1922-03-13",

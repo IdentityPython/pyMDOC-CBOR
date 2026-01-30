@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# This workflow installs dependencies, runs examples and tests (lint is in code-quality workflow)
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: pymdoccbor
@@ -23,32 +23,39 @@ jobs:
           - "3.12"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install system package
       run: |
         sudo apt update
-        sudo apt install python3-dev libssl-dev libffi-dev make automake gcc g++ 
-    - name: Install dependencies
+        sudo apt install python3-dev libssl-dev libffi-dev make automake gcc g++
+    - name: Create venv and install
       run: |
-        python -m pip install --upgrade pip
+        python -m venv env
+        source env/bin/activate
+        pip install --upgrade pip setuptools
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f requirements-customizations.txt ]; then pip install -r requirements-customizations.txt; fi
-        python -m pip install -U setuptools
-        python -m pip install -e .
-    - name: Lint with flake8
+        pip install -e .
+    - name: Run examples
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 pymdoccbor --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 pymdoccbor --count --exit-zero --statistics  --max-line-length 160
-    - name: Tests
+        source env/bin/activate
+        chmod +x scripts/run_examples.sh
+        ./scripts/run_examples.sh
+    - name: Run README and docs examples
       run: |
-        pytest --cov
-    - name: Bandit Security Scan
+        source env/bin/activate
+        python scripts/run_doc_examples.py
+    - name: Tests with coverage
       run: |
-        bandit -r -x pymdoccbor/test* pymdoccbor/*
+        source env/bin/activate
+        pytest --cov=pymdoccbor --cov-report=xml --cov-report=term-missing
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false

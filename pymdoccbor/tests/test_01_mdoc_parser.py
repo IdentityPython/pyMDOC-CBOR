@@ -17,9 +17,9 @@ def test_parse_mdoc_af_binary():
     assert len(mdoc.documents) == 1
 
     # testing format outputs
-    assert type(mdoc.data_as_string) == str
-    assert type(mdoc.data_as_bytes) == bytes
-    assert type(mdoc.data_as_cbor_dict) == dict
+    assert isinstance(mdoc.data_as_string, str)
+    assert isinstance(mdoc.data_as_bytes, bytes)
+    assert isinstance(mdoc.data_as_cbor_dict, dict)
 
     # testing from export re-import
     mdoc2 = MdocCbor()
@@ -30,7 +30,7 @@ def test_parse_mdoc_af_binary():
         assert i.is_valid
 
     assert len(mdoc.documents) == 1
-    
+
     # test repr
     mdoc.__repr__()
 

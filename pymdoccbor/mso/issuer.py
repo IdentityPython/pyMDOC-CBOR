@@ -18,9 +18,11 @@ from pymdoccbor.tools import shuffle_dict
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import Certificate
+from cbor_diag import cbor2diag
 
 
 logger = logging.getLogger("pymdoccbor")
+
 
 class MsoIssuer:
     """
@@ -59,7 +61,7 @@ class MsoIssuer:
         :param hsm: bool: hardware security module
         :param private_key: Union[dict, CoseKey]: the signing key
         :param digest_alg: str: the digest algorithm
-        :param revocation: dict: revocation status dict to include in the mso, it may include status_list and identifier_list keys
+        :param revocation: dict: revocation dict (may include status_list, identifier_list)
         """
 
         if private_key:
@@ -222,14 +224,18 @@ class MsoIssuer:
             _parsed_cert: Union[Certificate, None] = None
             try:
                 _parsed_cert = x509.load_pem_x509_certificate(certificate)
-            except Exception as e:
-                logger.error(f"Certificate at {self.cert_path} could not be loaded as PEM, trying DER")
-            
+            except Exception:
+                logger.error(
+                    f"Certificate at {self.cert_path} could not be loaded as PEM, trying DER"
+                )
+
             if not _parsed_cert:
                 try:
                     _parsed_cert = x509.load_der_x509_certificate(certificate)
-                except Exception as e:
-                    _err_msg = f"Certificate at {self.cert_path} could not be loaded as DER"
+                except Exception:
+                    _err_msg = (
+                        f"Certificate at {self.cert_path} could not be loaded as DER"
+                    )
                     logger.error(_err_msg)
 
             if _parsed_cert:
@@ -240,11 +246,12 @@ class MsoIssuer:
         else:
             if not self.cert_info:
                 raise ValueError("cert_info must be provided if cert_path is not set")
-            
+
             logger.warning(
-                "A self-signed certificate will be created using the provided cert_info but this is not recommended for production use."
+                "A self-signed certificate will be created using the provided "
+                "cert_info but this is not recommended for production use."
             )
-            
+
             _cert = selfsigned_x509cert(self.cert_info, self.private_key)
 
         if self.hsm:
@@ -266,7 +273,10 @@ class MsoIssuer:
             )
 
         else:
-            logger.debug("payload diagnostic notation: {cbor2diag(cbor2.dumps(cbor2.CBORTag(24,cbor2.dumps(payload))))}")
+            logger.debug(
+                "payload diagnostic notation: %s",
+                cbor2diag(cbor2.dumps(cbor2.CBORTag(24, cbor2.dumps(payload)))),
+            )
 
             mso = Sign1Message(
                 phdr={

@@ -71,10 +71,19 @@ mdoc = mdoci.new(
 `MdocCborIssuer` must be initialized with a private key.
 The method `.new()` gets the user attributes, devicekeyinfo and doctype.
 
-````
+````python
 import os
+from datetime import datetime, timezone, timedelta
 
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
+
+CERT_INFO = {
+    "country_name": "IT",
+    "organization_name": "Example Issuer",
+    "common_name": "Example mDL",
+    "not_valid_before": datetime.now(timezone.utc) - timedelta(days=1),
+    "not_valid_after": datetime.now(timezone.utc) + timedelta(days=365),
+}
 
 PKEY = {
     'KTY': 'EC2',
@@ -85,39 +94,36 @@ PKEY = {
 }
 
 PID_DATA = {
-        "eu.europa.ec.eudiw.pid.1": {
-            "family_name": "Raffaello",
-            "given_name": "Mascetti",
-            "birth_date": "1922-03-13",
-	        "birth_place": "Rome",
-            "birth_country": "IT"
-        }
+    "eu.europa.ec.eudiw.pid.1": {
+        "family_name": "Raffaello",
+        "given_name": "Mascetti",
+        "birth_date": "1922-03-13",
+        "birth_place": "Rome",
+        "birth_country": "IT"
     }
+}
 
 mdoci = MdocCborIssuer(
     private_key=PKEY,
-    alg = "ES256"
+    alg="ES256",
+    cert_info=CERT_INFO,
 )
 
 mdoc = mdoci.new(
     doctype="eu.europa.ec.eudiw.pid.1",
     data=PID_DATA,
     devicekeyinfo=PKEY,
-    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" },
-    # cert_path="/path/"
+    validity={"issuance_date": "2025-01-17", "expiry_date": "2025-11-13"},
 )
 
-mdoc
->> returns a python dictionay
+assert mdoc
+# >> mdoc returns a python dictionary (signed mdoc)
 
-mdoc.dump()
->> returns mdoc MSO bytes
+assert mdoci.dump()
+# >> mdoci.dumps() returns mdoc bytes
 
-mdoci.dump()
->> returns mdoc bytes
-
-mdoci.dumps()
->> returns AF Binary mdoc string representation
+assert mdoci.dumps()
+# >> mdoci.dumps() returns mdoc bytes
 ````
 
 ### Issue an MSO alone

@@ -1,5 +1,4 @@
 import cbor2
-import os
 
 from asn1crypto.x509 import Certificate
 from cryptography import x509
@@ -15,7 +14,7 @@ from pymdoccbor.tests.cert_data import CERT_DATA
 from pymdoccbor.tests.pkey import PKEY, PKEY_ED25519, PKEY_RSA
 
 
-def extract_mso(mdoc:dict):
+def extract_mso(mdoc: dict):
     mso_data = mdoc["documents"][0]["issuerSigned"]["issuerAuth"][2]
     mso_cbortag = cbor2.loads(mso_data)
     mso = cbor2.loads(mso_cbortag.value)
@@ -23,12 +22,12 @@ def extract_mso(mdoc:dict):
 
 
 def test_mso_writer():
-    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
+    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13"}
     msoi = MsoIssuer(
         data=PID_DATA,
         private_key=PKEY,
         validity=validity,
-        alg = "ES256",
+        alg="ES256",
         cert_info=CERT_DATA
     )
 
@@ -45,10 +44,10 @@ def test_mso_writer():
 
 
 def test_mdoc_issuer():
-    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
+    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13"}
     mdoci = MdocCborIssuer(
         private_key=PKEY,
-        alg = "ES256",
+        alg="ES256",
         cert_info=CERT_DATA
     )
     with open("pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
@@ -74,7 +73,7 @@ def test_mdoc_issuer():
     aa = cbor2.dumps(mdoc)
     mdocp.loads(aa)
     assert mdocp.verify() is True
-    
+
     mdoci.dump()
     mdoci.dumps()
 
@@ -84,14 +83,15 @@ def test_mdoc_issuer():
     assert status_list["idx"] == 0
     assert status_list["uri"] == "https://issuer.com/statuslists"
     cert_bytes = status_list["certificate"]
-    cert:Certificate = load_der_x509_certificate(cert_bytes)
-    assert "Test ASL Issuer" in cert.subject.rfc4514_string(), "ASL is not signed with the expected certificate"
+    cert: Certificate = load_der_x509_certificate(cert_bytes)
+    assert "Test ASL Issuer" in cert.subject.rfc4514_string()
+
 
 def test_mdoc_issuer_EdDSA():
-    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
+    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13"}
     mdoci = MdocCborIssuer(
         private_key=PKEY,
-        alg = "ES256",
+        alg="ES256",
         cert_info=CERT_DATA
     )
     with open("pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
@@ -117,7 +117,7 @@ def test_mdoc_issuer_EdDSA():
     aa = cbor2.dumps(mdoc)
     mdocp.loads(aa)
     assert mdocp.verify() is True
-    
+
     mdoci.dump()
     mdoci.dumps()
 
@@ -127,14 +127,15 @@ def test_mdoc_issuer_EdDSA():
     assert status_list["idx"] == 0
     assert status_list["uri"] == "https://issuer.com/statuslists"
     cert_bytes = status_list["certificate"]
-    cert:Certificate = load_der_x509_certificate(cert_bytes)
-    assert "Test ASL Issuer" in cert.subject.rfc4514_string(), "ASL is not signed with the expected certificate"
+    cert: Certificate = load_der_x509_certificate(cert_bytes)
+    assert "Test ASL Issuer" in cert.subject.rfc4514_string()
+
 
 def test_mdoc_issuer_RSA():
-    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13" }
+    validity = {"issuance_date": "2025-01-17", "expiry_date": "2025-11-13"}
     mdoci = MdocCborIssuer(
         private_key=PKEY,
-        alg = "ES256",
+        alg="ES256",
         cert_info=CERT_DATA
     )
     with open("pymdoccbor/tests/certs/fake-cert.pem", "rb") as file:
@@ -160,7 +161,7 @@ def test_mdoc_issuer_RSA():
     aa = cbor2.dumps(mdoc)
     mdocp.loads(aa)
     assert mdocp.verify() is True
-    
+
     mdoci.dump()
     mdoci.dumps()
 
@@ -170,5 +171,5 @@ def test_mdoc_issuer_RSA():
     assert status_list["idx"] == 0
     assert status_list["uri"] == "https://issuer.com/statuslists"
     cert_bytes = status_list["certificate"]
-    cert:Certificate = load_der_x509_certificate(cert_bytes)
-    assert "Test ASL Issuer" in cert.subject.rfc4514_string(), "ASL is not signed with the expected certificate"
+    cert: Certificate = load_der_x509_certificate(cert_bytes)
+    assert "Test ASL Issuer" in cert.subject.rfc4514_string()

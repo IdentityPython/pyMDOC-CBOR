@@ -92,8 +92,7 @@ class MdocCborIssuer:
         :param devicekeyinfo: Union[dict, CoseKey, str]: device key info
         :param cert_path: str: path to the certificate
         :param revocation: dict: revocation status dict it may include status_list and identifier_list keys
-        :param status: dict: status dict that includes the status list's uri and the idx following the "https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list" specification
-
+        :param status: dict: status dict with uri and idx per draft-ietf-oauth-status-list
         :return: dict: signed mdoc
         """
         if isinstance(devicekeyinfo, dict):
@@ -237,12 +236,12 @@ class MdocCborIssuer:
         }
 
         if status:
-            if not "status_list" in status:
+            if "status_list" not in status:
                 raise InvalidStatusDescriptor("status_list is required")
 
-            if not "uri" in status["status_list"]:
+            if "uri" not in status["status_list"]:
                 raise InvalidStatusDescriptor("uri is required")
-            if not "idx" in status["status_list"]:
+            if "idx" not in status["status_list"]:
                 raise InvalidStatusDescriptor("idx is required")
 
             res["status"] = status

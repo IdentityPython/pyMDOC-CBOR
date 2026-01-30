@@ -1,9 +1,10 @@
 #!/bin/bash
+# Code quality: format, lint, security scan.
+# Uses .flake8 for flake8 config (max-line-length 120).
 
 autopep8 -r --in-place pymdoccbor
-autoflake -r --in-place  --remove-unused-variables --expand-star-imports --remove-all-unused-imports pymdoccbor
+autoflake -r --in-place --remove-unused-variables --expand-star-imports --remove-all-unused-imports pymdoccbor
 
-flake8 pymdoccbor --count --select=E9,F63,F7,F82 --show-source --statistics
-flake8 pymdoccbor --max-line-length 120 --count --statistics
+flake8 pymdoccbor
 
-bandit -r -x pymdoccbor/test* pymdoccbor/*
+bandit -r -x pymdoccbor/tests pymdoccbor

@@ -1,7 +1,16 @@
 import cbor2
 import os
+from datetime import datetime, timezone, timedelta
 
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
+
+CERT_INFO = {
+    "country_name": "IT",
+    "organization_name": "Example Issuer",
+    "common_name": "Example mDL",
+    "not_valid_before": datetime.now(timezone.utc) - timedelta(days=1),
+    "not_valid_after": datetime.now(timezone.utc) + timedelta(days=365),
+}
 
 PKEY = {
     'KTY': 'EC2',
@@ -55,6 +64,7 @@ PID_DATA = {
 mdoci = MdocCborIssuer(
     private_key=PKEY,
     alg="ES256",
+    cert_info=CERT_INFO,
 )
 
 mdoc = mdoci.new(

@@ -2,10 +2,11 @@ import cbor2
 import cryptography
 import logging
 
-from pycose.keys import CoseKey, EC2Key
+from cryptography.exceptions import InvalidSignature
+from pycose.keys import EC2Key
 from pycose.messages import Sign1Message
 
-from typing import Union, Any
+from typing import Union
 
 from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
@@ -13,7 +14,7 @@ from pymdoccbor.exceptions import (
 )
 from pymdoccbor import settings
 from pymdoccbor.tools import bytes2CoseSign1, cborlist2CoseSign1
-
+        
 
 logger = logging.getLogger("pymdoccbor")
 
@@ -116,11 +117,11 @@ class MsoVerifier:
     def attest_public_key(self, trusted_root_certs: list = None):
         """
         Verify the X.509 certificate chain.
-        
+
         Args:
             trusted_root_certs: List of trusted root certificates (x509.Certificate objects)
                                If None, skips chain validation (backward compatible)
-        
+
         Returns:
             The trusted root certificate that signed the DS cert, or None if validation skipped
         """
@@ -130,17 +131,12 @@ class MsoVerifier:
                 "Pass trusted_root_certs parameter to verify() to enable X.509 chain validation."
             )
             return None
-        
-        # Verify certificate chain
-        from cryptography import x509
-        from cryptography.hazmat.primitives import hashes
-        from cryptography.exceptions import InvalidSignature
-        
+
         # Load DS certificate (first in chain)
         ds_cert = self.x509_certificates[0] if self.x509_certificates else None
         if not ds_cert:
             raise ValueError("No DS certificate found in MSO")
-        
+
         # Verify DS cert is signed by one of the trusted roots
         verified_root = None
         for root_cert in trusted_root_certs:
@@ -156,23 +152,25 @@ class MsoVerifier:
                 break
             except InvalidSignature:
                 continue
-            except Exception as e:
-                logger.warning(f"Error verifying with root cert: {e}")
+            except Exception as exc:
+                logger.warning(f"Error verifying with root cert: {exc}")
                 continue
-        
+
         if not verified_root:
             raise ValueError("DS certificate not signed by any trusted root")
-        
+
         # Verify certificate validity dates
         from datetime import datetime, timezone
         now = datetime.now(timezone.utc)
-        
+
         if ds_cert.not_valid_before_utc > now:
             raise ValueError(f"DS certificate not yet valid (valid from {ds_cert.not_valid_before_utc})")
-        
+
         if ds_cert.not_valid_after_utc < now:
-            raise ValueError(f"DS certificate expired (valid until {ds_cert.not_valid_after_utc})")
-        
+            raise ValueError(
+                f"DS certificate expired (valid until {ds_cert.not_valid_after_utc})"
+            )
+
         logger.info("Certificate chain and validity verified successfully")
         return verified_root
 
@@ -198,7 +196,9 @@ class MsoVerifier:
             x=self.public_key.public_numbers().x.to_bytes(
                 settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'
             ),
-            y=self.public_key.public_numbers().y.to_bytes( settings.CRV_LEN_MAP[self.public_key.curve.name], 'big')
+            y=self.public_key.public_numbers().y.to_bytes(
+                settings.CRV_LEN_MAP[self.public_key.curve.name], 'big'
+            )
         )
         self.object.key = key
 
@@ -214,45 +214,45 @@ class MsoVerifier:
             self.load_public_key(trusted_root_certs)
 
         return self.object.verify_signature()
-    
+
     def verify_element_hashes(self, namespaces: dict) -> dict:
         """
         Verify that disclosed elements match their hashes in the MSO.
-        
+
         Args:
             namespaces: The nameSpaces dict from IssuerSigned containing IssuerSignedItems
-        
+
         Returns:
             dict: Results with 'valid' (bool), 'total' (int), 'verified' (int), 'failed' (list)
         """
         import hashlib
-        
+
         mso_data = self.payload_as_dict
         value_digests = mso_data.get('valueDigests', {})
-        
+
         results = {
             'valid': True,
             'total': 0,
             'verified': 0,
             'failed': []
         }
-        
+
         for namespace, items in namespaces.items():
             if namespace not in value_digests:
                 logger.warning(f"Namespace {namespace} not found in MSO valueDigests")
                 continue
-            
+
             namespace_digests = value_digests[namespace]
-            
+
             for item_bytes in items:
                 results['total'] += 1
-                
+
                 # item_bytes might be a CBORTag object, need to encode it
                 if isinstance(item_bytes, cbor2.CBORTag):
                     item_bytes_raw = cbor2.dumps(item_bytes)
                 else:
                     item_bytes_raw = item_bytes
-                
+
                 # Decode to get digestID
                 try:
                     item_data = cbor2.loads(item_bytes_raw)
@@ -260,16 +260,16 @@ class MsoVerifier:
                         item_content = cbor2.loads(item_data.value)
                     else:
                         item_content = item_data
-                    
+
                     digest_id = item_content.get('digestID')
                     element_id = item_content.get('elementIdentifier')
-                    
+
                     # Compute hash of the full tagged bytes
                     computed_hash = hashlib.sha256(item_bytes_raw).digest()
-                    
+
                     # Get expected hash from MSO
                     expected_hash = namespace_digests.get(digest_id)
-                    
+
                     if expected_hash is None:
                         logger.error(f"digestID {digest_id} not found in MSO for {namespace}/{element_id}")
                         results['failed'].append({
@@ -280,7 +280,7 @@ class MsoVerifier:
                         })
                         results['valid'] = False
                         continue
-                    
+
                     if computed_hash != expected_hash:
                         logger.error(f"Hash mismatch for {namespace}/{element_id} (digestID={digest_id})")
                         results['failed'].append({
@@ -295,7 +295,7 @@ class MsoVerifier:
                     else:
                         results['verified'] += 1
                         logger.debug(f"Hash verified for {namespace}/{element_id}")
-                
+
                 except Exception as e:
                     logger.error(f"Error verifying element hash: {e}")
                     results['failed'].append({
@@ -303,5 +303,5 @@ class MsoVerifier:
                         'reason': f'exception: {e}'
                     })
                     results['valid'] = False
-        
+
         return results

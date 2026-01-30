@@ -24,6 +24,7 @@ pyMDOC-CBOR supports comprehensive mDOC verification including:
 ### Basic Verification (Signature Only)
 
 ```python
+# skip in doc examples (requires device_response_bytes from previous context)
 from pymdoccbor.mdoc.verifier import MdocCbor
 
 mdoc = MdocCbor()
@@ -38,6 +39,7 @@ is_valid = mdoc.verify()
 ### Full Verification (Recommended)
 
 ```python
+# skip in doc examples (requires device_response_bytes and iaca_cert.pem)
 from pymdoccbor.mdoc.verifier import MdocCbor
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -60,6 +62,7 @@ if is_valid:
 ### Verification Options
 
 ```python
+# skip in doc examples (requires mdoc and trusted_certs from previous context)
 # Full verification (default)
 mdoc.verify(trusted_root_certs=trusted_certs, verify_hashes=True)
 
@@ -76,6 +79,7 @@ mdoc.verify(verify_hashes=False)
 ### Accessing Verification Results
 
 ```python
+# skip in doc examples (requires mdoc and trusted_certs from previous context)
 mdoc.verify(trusted_root_certs=trusted_certs, verify_hashes=True)
 
 for doc in mdoc.documents:
@@ -123,6 +127,7 @@ The hash verification process:
 ⚠️ **The hash MUST be computed on the complete CBOR Tag 24 structure**, not just the content:
 
 ```python
+# skip in doc examples (illustrative snippet; item_content from context)
 # CORRECT: Hash includes the Tag 24 wrapper
 item_tag = CBORTag(24, item_content)
 tagged_bytes = cbor2.dumps(item_tag)  # Includes d818... prefix
@@ -141,6 +146,7 @@ Example bytes structure:
 The `hash_verification` attribute contains:
 
 ```python
+# skip in doc examples (structure documentation only)
 {
     'valid': bool,        # True if all hashes match
     'total': int,         # Total number of elements checked
@@ -167,6 +173,7 @@ The `trusted_root_certs` parameter accepts a list of `cryptography.x509.Certific
 **Supported input formats:**
 
 ```python
+# skip in doc examples (requires cert.pem / cert.der on disk)
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
@@ -214,6 +221,7 @@ The DS certificate is automatically extracted from the mDOC's Mobile Security Ob
 ## Error Handling
 
 ```python
+# skip in doc examples (requires mdoc and trusted_certs from previous context)
 try:
     is_valid = mdoc.verify(trusted_root_certs=trusted_certs, verify_hashes=True)
     if not is_valid:
@@ -275,6 +283,7 @@ Without hash verification, an attacker could:
 ## Example: Managing Multiple Root Certificates
 
 ```python
+# skip in doc examples (requires device_response_bytes; loads certs from /etc/mdoc/trusted_certs)
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from pathlib import Path
@@ -374,6 +383,7 @@ Both verification features are fully backward compatible:
 ## Complete Example
 
 ```python
+# skip in doc examples (requires device_response_bytes; uses Path for trusted certs)
 from pymdoccbor.mdoc.verifier import MdocCbor
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend

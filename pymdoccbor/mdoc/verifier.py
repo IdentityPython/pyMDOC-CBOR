@@ -52,7 +52,7 @@ class MobileDocument:
         :return: bytes: the document as bytes
         """
         return binascii.hexlify(self.dump())
-    
+
     def dump(self) -> bytes:
         """
         It returns the document as bytes
@@ -63,14 +63,14 @@ class MobileDocument:
             'docType': self.doctype,
             'issuerSigned': self.issuersigned.dumps()
         }
-        
+
         # Include errors field if present (ISO 18013-5 status != 0)
         if self.errors:
             doc_dict['errors'] = self.errors
-        
+
         return cbor2.dumps(
             cbor2.CBORTag(
-                24, 
+                24,
                 value=doc_dict
             )
         )
@@ -86,7 +86,7 @@ class MobileDocument:
         """
         # Verify signature
         self.is_valid = self.issuersigned.issuer_auth.verify_signature(trusted_root_certs)
-        
+
         # Verify element hashes if requested
         if verify_hashes and self.is_valid:
             hash_results = self.issuersigned.issuer_auth.verify_element_hashes(
@@ -94,7 +94,7 @@ class MobileDocument:
             )
             self.hash_verification = hash_results
             self.is_valid = self.is_valid and hash_results['valid']
-        
+
         return self.is_valid
 
     def __repr__(self) -> str:
@@ -116,7 +116,7 @@ class MdocCbor:
         self.documents: List[MobileDocument] = []
         self.documents_invalid: list = []
         self.disclosure_map: dict = {}
-    
+
     def loads(self, data: str) -> None:
         """
         Load the data from a AF Binary string
@@ -146,7 +146,7 @@ class MdocCbor:
     @property
     def data_as_string(self) -> str:
         return self.dumps().decode()
-    
+
     def _decode_claims(self, claims: list[dict]) -> dict:
         decoded_claims = {}
 
@@ -163,7 +163,7 @@ class MdocCbor:
                     if not isinstance(element, dict):
                         claims_list.append(element)
                         continue
-                    
+
                     # Handle dict elements
                     claims_dict = {}
                     for key, value in element.items():
@@ -179,9 +179,8 @@ class MdocCbor:
 
         return decoded_claims
 
-
     def verify(self, trusted_root_certs: list = None, verify_hashes: bool = True) -> bool:
-        """"
+        """
         Verify signatures of all documents contained in the mdoc
 
         Args:
@@ -190,7 +189,6 @@ class MdocCbor:
             verify_hashes: If True, also verify element hashes against MSO valueDigests
         :return: bool: True if all signatures are valid, False otherwise
         """
-
         cdict = self.data_as_cbor_dict
 
         for i in ('version', 'documents'):

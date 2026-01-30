@@ -1,4 +1,3 @@
-import os
 import cbor2
 import datetime
 from pymdoccbor.mdoc.issuer import MdocCborIssuer

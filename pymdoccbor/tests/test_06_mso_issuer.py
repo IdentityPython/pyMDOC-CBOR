@@ -1,4 +1,3 @@
-from pycose.keys import EC2Key
 from pycose.messages import CoseMessage
 from pymdoccbor.mso.issuer import MsoIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
@@ -11,6 +10,7 @@ def test_mso_issuer_fail():
         MsoIssuer(None, None)
     except Exception as e:
         assert str(e) == "MSO Writer requires a valid private key"
+
 
 def test_mso_issuer_creation():
     msoi = MsoIssuer(
@@ -29,6 +29,7 @@ def test_mso_issuer_creation():
     assert msoi.hash_map
     assert list(msoi.hash_map.keys())[0] == 'org.micov.medical.1'
     assert msoi.disclosure_map['org.micov.medical.1']
+
 
 def test_mso_issuer_sign():
     msoi = MsoIssuer(

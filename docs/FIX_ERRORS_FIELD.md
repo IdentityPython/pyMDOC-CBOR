@@ -76,31 +76,53 @@ All tests pass: **36/36 passed**
 
 ### With errors field (status != 0)
 ```python
+import os
+from datetime import datetime, timezone, timedelta
+from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.mdoc.verifier import MobileDocument
 
-document = {
-    'docType': 'eu.europa.ec.eudi.pid.1',
-    'issuerSigned': {...},
-    'errors': {
-        'eu.europa.ec.eudi.pid.1': {
-            'missing_element': 1
-        }
-    }
+CERT_INFO = {
+    "country_name": "IT",
+    "organization_name": "Example",
+    "common_name": "Example mDL",
+    "not_valid_before": datetime.now(timezone.utc) - timedelta(days=1),
+    "not_valid_after": datetime.now(timezone.utc) + timedelta(days=365),
 }
+PKEY = {"KTY": "EC2", "CURVE": "P_256", "ALG": "ES256", "D": os.urandom(32), "KID": b"kid"}
+DATA = {"org.micov.medical.1": {"family_name": "Test", "given_name": "User"}}
 
-doc = MobileDocument(**document)  # ✅ Works now!
-print(doc.errors)  # {'eu.europa.ec.eudi.pid.1': {'missing_element': 1}}
+issuer = MdocCborIssuer(private_key=PKEY, alg="ES256", cert_info=CERT_INFO)
+issuer.new(data=DATA, doctype="org.micov.medical.1", validity={"issuance_date": "2025-01-01", "expiry_date": "2025-12-31"})
+document = issuer.signed["documents"][0]
+document["errors"] = {"org.micov.medical.1": {"missing_element": 1}}
+
+doc = MobileDocument(**document)
+assert doc.errors == {"org.micov.medical.1": {"missing_element": 1}}
 ```
 
 ### Without errors field (status == 0)
 ```python
-document = {
-    'docType': 'eu.europa.ec.eudi.pid.1',
-    'issuerSigned': {...}
-}
+import os
+from datetime import datetime, timezone, timedelta
+from pymdoccbor.mdoc.issuer import MdocCborIssuer
+from pymdoccbor.mdoc.verifier import MobileDocument
 
-doc = MobileDocument(**document)  # ✅ Still works
-print(doc.errors)  # {}
+CERT_INFO = {
+    "country_name": "IT",
+    "organization_name": "Example",
+    "common_name": "Example mDL",
+    "not_valid_before": datetime.now(timezone.utc) - timedelta(days=1),
+    "not_valid_after": datetime.now(timezone.utc) + timedelta(days=365),
+}
+PKEY = {"KTY": "EC2", "CURVE": "P_256", "ALG": "ES256", "D": os.urandom(32), "KID": b"kid"}
+DATA = {"org.micov.medical.1": {"family_name": "Test", "given_name": "User"}}
+
+issuer = MdocCborIssuer(private_key=PKEY, alg="ES256", cert_info=CERT_INFO)
+issuer.new(data=DATA, doctype="org.micov.medical.1", validity={"issuance_date": "2025-01-01", "expiry_date": "2025-12-31"})
+document = issuer.signed["documents"][0]
+
+doc = MobileDocument(**document)
+assert doc.errors == {}
 ```
 
 ## ISO 18013-5 Reference

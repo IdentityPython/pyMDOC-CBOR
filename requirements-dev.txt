@@ -6,5 +6,11 @@ isort
 autoflake
 bandit
 autopep8
-pycose>=1.0.1
-cbor2>=5.4.0
+radon
+pip-audit
+# Pinned to fix known vulnerabilities (pip-audit).
+jaraco.context>=6.1.0
+requests>=2.32.4
+setuptools>=78.1.1
+urllib3>=2.6.3
+wheel>=0.46.2

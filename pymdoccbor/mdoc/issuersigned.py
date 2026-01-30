@@ -3,6 +3,7 @@ from typing import Union
 
 from pymdoccbor.mso.verifier import MsoVerifier
 
+
 class IssuerSigned:
     """
     nameSpaces provides the definition within which the data elements of
