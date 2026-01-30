@@ -5,11 +5,11 @@ ISO 18013-5 specifies that when status != 0, documents may contain
 an 'errors' field describing which elements were not available.
 """
 
-from pymdoccbor.mdoc.verifier import MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
+from pymdoccbor.mdoc.verifier import MobileDocument
+from pymdoccbor.tests.cert_data import CERT_DATA
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
-from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 def test_mobile_document_with_errors_field():

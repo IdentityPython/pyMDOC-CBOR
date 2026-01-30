@@ -1,25 +1,23 @@
-import cbor2
 import datetime
 import hashlib
+import logging
 import secrets
 import uuid
-import logging
-
-from pycose.keys import CoseKey
-from pycose.headers import Algorithm
-from pycose.messages import Sign1Message
-
 from typing import Union
 
-from pymdoccbor.exceptions import MsoPrivateKeyRequired
-from pymdoccbor import settings
-from pymdoccbor.x509 import selfsigned_x509cert
-from pymdoccbor.tools import shuffle_dict
+import cbor2
+from cbor_diag import cbor2diag
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.x509 import Certificate
-from cbor_diag import cbor2diag
+from pycose.headers import Algorithm
+from pycose.keys import CoseKey
+from pycose.messages import Sign1Message
 
+from pymdoccbor import settings
+from pymdoccbor.exceptions import MsoPrivateKeyRequired
+from pymdoccbor.tools import shuffle_dict
+from pymdoccbor.x509 import selfsigned_x509cert
 
 logger = logging.getLogger("pymdoccbor")
 

@@ -1,20 +1,19 @@
 import base64
 import binascii
-import cbor2
 import logging
 from datetime import datetime, timezone
+from typing import Union
+
+import cbor2
+from cbor_diag import cbor2diag
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKey
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from pycose.keys import CoseKey, EC2Key
-from typing import Union
 
-from pymdoccbor.mso.issuer import MsoIssuer
-
-from cbor_diag import cbor2diag
 from pymdoccbor.mdoc.exceptions import InvalidStatusDescriptor
-
+from pymdoccbor.mso.issuer import MsoIssuer
 
 logger = logging.getLogger("pymdoccbor")
 

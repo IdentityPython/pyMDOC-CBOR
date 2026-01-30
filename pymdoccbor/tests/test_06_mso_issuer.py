@@ -1,8 +1,9 @@
 from pycose.messages import CoseMessage
+
 from pymdoccbor.mso.issuer import MsoIssuer
+from pymdoccbor.tests.cert_data import CERT_DATA
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
-from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 def test_mso_issuer_fail():

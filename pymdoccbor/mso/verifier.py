@@ -1,20 +1,16 @@
+import logging
+from typing import Union
+
 import cbor2
 import cryptography
-import logging
-
 from cryptography.exceptions import InvalidSignature
 from pycose.keys import EC2Key
 from pycose.messages import Sign1Message
 
-from typing import Union
-
-from pymdoccbor.exceptions import (
-    MsoX509ChainNotFound,
-    UnsupportedMsoDataFormat
-)
 from pymdoccbor import settings
+from pymdoccbor.exceptions import (MsoX509ChainNotFound,
+                                   UnsupportedMsoDataFormat)
 from pymdoccbor.tools import bytes2CoseSign1, cborlist2CoseSign1
-        
 
 logger = logging.getLogger("pymdoccbor")
 

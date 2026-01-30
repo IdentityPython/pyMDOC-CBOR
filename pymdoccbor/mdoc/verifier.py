@@ -1,12 +1,13 @@
 import binascii
-import cbor2
 import logging
-
 from typing import List
 
+import cbor2
+
 from pymdoccbor.exceptions import InvalidMdoc
+from pymdoccbor.mdoc.exceptions import (NoDocumentTypeProvided,
+                                        NoSignedDocumentProvided)
 from pymdoccbor.mdoc.issuersigned import IssuerSigned
-from pymdoccbor.mdoc.exceptions import NoDocumentTypeProvided, NoSignedDocumentProvided
 
 logger = logging.getLogger('pymdoccbor')
 

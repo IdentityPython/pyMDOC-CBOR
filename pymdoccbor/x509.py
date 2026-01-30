@@ -1,12 +1,11 @@
 from typing import Any, Union
 
-from pycose.keys import CoseKey
-
 from cryptography import x509
-from cryptography.x509.oid import NameOID
-from cryptography.x509 import Certificate
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519
+from cryptography.x509 import Certificate
+from cryptography.x509.oid import NameOID
+from pycose.keys import CoseKey
 
 
 def selfsigned_x509cert(

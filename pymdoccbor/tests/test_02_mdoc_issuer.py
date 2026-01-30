@@ -1,5 +1,4 @@
 import cbor2
-
 from asn1crypto.x509 import Certificate
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
@@ -9,8 +8,8 @@ from pycose.messages import Sign1Message
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.mdoc.verifier import MdocCbor
 from pymdoccbor.mso.issuer import MsoIssuer
-from pymdoccbor.tests.pid_data import PID_DATA
 from pymdoccbor.tests.cert_data import CERT_DATA
+from pymdoccbor.tests.pid_data import PID_DATA
 from pymdoccbor.tests.pkey import PKEY, PKEY_ED25519, PKEY_RSA
 
 

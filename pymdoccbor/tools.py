@@ -1,12 +1,8 @@
-import cbor2
 import json
 import random
 
-
-from cbor2.tool import (
-    DefaultEncoder,
-    key_to_str
-)
+import cbor2
+from cbor2.tool import DefaultEncoder, key_to_str
 from pycose.messages import Sign1Message
 
 

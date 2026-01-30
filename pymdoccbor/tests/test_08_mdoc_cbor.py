@@ -1,10 +1,12 @@
-import cbor2
 import datetime
+
+import cbor2
+
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
-from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.mdoc.verifier import MdocCbor
-from pymdoccbor.tests.pkey import PKEY
 from pymdoccbor.tests.cert_data import CERT_DATA
+from pymdoccbor.tests.micov_data import MICOV_DATA
+from pymdoccbor.tests.pkey import PKEY
 
 
 def normalize_dates(obj):

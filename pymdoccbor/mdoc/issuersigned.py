@@ -1,5 +1,6 @@
-import cbor2
 from typing import Union
+
+import cbor2
 
 from pymdoccbor.mso.verifier import MsoVerifier
 

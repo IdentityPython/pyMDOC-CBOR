@@ -1,8 +1,8 @@
-from pymdoccbor.mdoc.verifier import MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
+from pymdoccbor.mdoc.verifier import MobileDocument
+from pymdoccbor.tests.cert_data import CERT_DATA
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
-from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 def test_verifier_must_fail_document_type():

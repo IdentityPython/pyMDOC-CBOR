@@ -2,21 +2,22 @@
 Test certificate chain verification and element hash verification.
 """
 
+from datetime import datetime, timedelta, timezone
+
+import cbor2
 import pytest
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
-from datetime import datetime, timedelta, timezone
-import cbor2
 
-from pymdoccbor.mdoc.verifier import MdocCbor, MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
+from pymdoccbor.mdoc.verifier import MdocCbor, MobileDocument
 from pymdoccbor.mso.verifier import MsoVerifier
+from pymdoccbor.tests.cert_data import CERT_DATA
 from pymdoccbor.tests.micov_data import MICOV_DATA
 from pymdoccbor.tests.pkey import PKEY
-from pymdoccbor.tests.cert_data import CERT_DATA
 
 
 def generate_test_certificates():
