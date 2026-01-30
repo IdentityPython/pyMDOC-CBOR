@@ -11,6 +11,11 @@ from pymdoccbor.exceptions import (
     MsoX509ChainNotFound,
     UnsupportedMsoDataFormat
 )
+
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.exceptions import InvalidSignature
+
 from pymdoccbor import settings
 from pymdoccbor.tools import bytes2CoseSign1, cborlist2CoseSign1
 
@@ -132,9 +137,7 @@ class MsoVerifier:
             return None
         
         # Verify certificate chain
-        from cryptography import x509
-        from cryptography.hazmat.primitives import hashes
-        from cryptography.exceptions import InvalidSignature
+
         
         # Load DS certificate (first in chain)
         ds_cert = self.x509_certificates[0] if self.x509_certificates else None
