@@ -41,6 +41,7 @@ class MobileDocument:
 
         self.issuersigned: List[IssuerSigned] = IssuerSigned(**issuerSigned)
         self.is_valid = False
+        self.hash_verification = None  # Will store hash verification results
         self.devicesigned: dict = deviceSigned
         self.errors: dict = errors if errors is not None else {}
 
@@ -74,13 +75,26 @@ class MobileDocument:
             )
         )
 
-    def verify(self) -> bool:
+    def verify(self, trusted_root_certs: list = None, verify_hashes: bool = True) -> bool:
         """
-        Verify the document signature
+        Verify the document signature and optionally element hashes
 
+        Args:
+            trusted_root_certs: List of trusted root certificates for chain validation
+            verify_hashes: If True, also verify element hashes against MSO
         :return: bool: True if the signature is valid, False otherwise
         """
-        self.is_valid = self.issuersigned.issuer_auth.verify_signature()
+        # Verify signature
+        self.is_valid = self.issuersigned.issuer_auth.verify_signature(trusted_root_certs)
+        
+        # Verify element hashes if requested
+        if verify_hashes and self.is_valid:
+            hash_results = self.issuersigned.issuer_auth.verify_element_hashes(
+                self.issuersigned.namespaces
+            )
+            self.hash_verification = hash_results
+            self.is_valid = self.is_valid and hash_results['valid']
+        
         return self.is_valid
 
     def __repr__(self) -> str:
@@ -166,10 +180,14 @@ class MdocCbor:
         return decoded_claims
 
 
-    def verify(self) -> bool:
+    def verify(self, trusted_root_certs: list = None, verify_hashes: bool = True) -> bool:
         """"
         Verify signatures of all documents contained in the mdoc
 
+        Args:
+            trusted_root_certs: List of trusted root certificates (x509.Certificate objects)
+                               for chain validation. If None, skips chain validation.
+            verify_hashes: If True, also verify element hashes against MSO valueDigests
         :return: bool: True if all signatures are valid, False otherwise
         """
 
@@ -186,7 +204,7 @@ class MdocCbor:
             mso = MobileDocument(**doc)
 
             try:
-                if mso.verify():
+                if mso.verify(trusted_root_certs, verify_hashes):
                     self.documents.append(mso)
                 else:
                     self.documents_invalid.append(mso)
