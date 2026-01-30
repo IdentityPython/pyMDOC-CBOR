@@ -81,7 +81,7 @@ class MdocCborIssuer:
         devicekeyinfo: dict | CoseKey | str | None = None,
         cert_path: str | None = None,
         revocation: dict | None = None,
-        status: dict | None = None,
+        status: dict | None = None
     ) -> dict:
         """
         create a new mdoc with signed mso
@@ -161,7 +161,7 @@ class MdocCborIssuer:
                     -1: "Ed25519",  # Curve identifier for Ed25519
                     -2: public_key.public_bytes(
                         encoding=serialization.Encoding.Raw,
-                        format=serialization.PublicFormat.Raw,
+                        format=serialization.PublicFormat.Raw
                     ),
                 }
             elif isinstance(public_key, RSAPublicKey):
@@ -172,7 +172,7 @@ class MdocCborIssuer:
                     ),
                     -2: public_key.public_numbers().e.to_bytes(
                         (public_key.public_numbers().e.bit_length() + 7) // 8, "big"
-                    ),
+                    )
                 }
             else:
                 raise TypeError("Loaded public key is not an EllipticCurvePublicKey")
@@ -190,7 +190,7 @@ class MdocCborIssuer:
                 kid=self.kid,
                 validity=validity,
                 revocation=revocation,
-                cert_info=self.cert_info,
+                cert_info=self.cert_info
             )
 
         else:
@@ -201,13 +201,13 @@ class MdocCborIssuer:
                 cert_path=cert_path,
                 validity=validity,
                 revocation=revocation,
-                cert_info=self.cert_info,
+                cert_info=self.cert_info
             )
 
         mso = msoi.sign(
             doctype=doctype,
             device_key=devicekeyinfo,
-            valid_from=datetime.now(timezone.utc),
+            valid_from=datetime.now(timezone.utc)
         )
 
         mso_cbor = mso.encode(
@@ -229,7 +229,7 @@ class MdocCborIssuer:
                             ns: [v for k, v in dgst.items()]
                             for ns, dgst in msoi.disclosure_map.items()
                         },
-                        "issuerAuth": cbor2.loads(mso_cbor),
+                        "issuerAuth": cbor2.loads(mso_cbor)
                     },
                 }
             ],
