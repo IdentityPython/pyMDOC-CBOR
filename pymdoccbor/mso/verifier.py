@@ -1,6 +1,8 @@
 import cbor2
 import cryptography
+import hashlib
 import logging
+from datetime import datetime, timezone
 
 from pycose.keys import CoseKey, EC2Key
 from pycose.messages import Sign1Message
@@ -167,7 +169,6 @@ class MsoVerifier:
             raise ValueError("DS certificate not signed by any trusted root")
         
         # Verify certificate validity dates
-        from datetime import datetime, timezone
         now = datetime.now(timezone.utc)
         
         if ds_cert.not_valid_before_utc > now:
@@ -228,8 +229,6 @@ class MsoVerifier:
         Returns:
             dict: Results with 'valid' (bool), 'total' (int), 'verified' (int), 'failed' (list)
         """
-        import hashlib
-        
         mso_data = self.payload_as_dict
         value_digests = mso_data.get('valueDigests', {})
         

@@ -5,6 +5,8 @@ ISO 18013-5 specifies that when status != 0, documents may contain
 an 'errors' field describing which elements were not available.
 """
 
+import cbor2
+
 from pymdoccbor.mdoc.verifier import MobileDocument
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
 from pymdoccbor.tests.micov_data import MICOV_DATA
@@ -103,7 +105,6 @@ def test_mobile_document_dump_with_errors():
     assert isinstance(dump, bytes)
     
     # Decode and verify errors field is present
-    import cbor2
     decoded = cbor2.loads(dump)
     # The dump is wrapped in a CBORTag, so we need to access .value
     if hasattr(decoded, 'value'):
@@ -138,7 +139,6 @@ def test_mobile_document_dump_without_errors():
     assert isinstance(dump, bytes)
     
     # Decode and verify errors field is NOT present
-    import cbor2
     decoded = cbor2.loads(dump)
     if hasattr(decoded, 'value'):
         decoded = decoded.value
