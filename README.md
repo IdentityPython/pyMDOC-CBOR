@@ -189,6 +189,27 @@ mdoc.disclosure_map
 >> ... dictionary containing all the disclosed attributes ...
 ````
 
+### Verify with Certificate Chain and Element Hashes
+
+For production use, verify both the X.509 certificate chain and element hashes:
+
+````python
+# skip in doc examples (requires your_ca_cert.pem and device_response_bytes)
+from pymdoccbor.mdoc.verifier import MdocCbor
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+
+# Load trusted root certificates
+with open('your_ca_cert.pem', 'rb') as f:
+    iaca_cert = x509.load_pem_x509_certificate(f.read(), default_backend())
+
+mdoc = MdocCbor()
+mdoc.loads(device_response_bytes)
+is_valid = mdoc.verify(trusted_root_certs=[iaca_cert], verify_hashes=True)
+````
+
+For complete documentation on certificate chain verification and hash verification, see [docs/CERTIFICATE-CHAIN-VERIFICATION.md](docs/CERTIFICATE-CHAIN-VERIFICATION.md).
+
 ### Verify the Mobile Security Object
 
 ````
