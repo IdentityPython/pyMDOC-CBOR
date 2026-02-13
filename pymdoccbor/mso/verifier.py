@@ -1,3 +1,4 @@
+# Aligns with https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR
 import hashlib
 import logging
 from datetime import datetime, timezone
@@ -39,15 +40,21 @@ class MsoVerifier:
 
         self._data = data
 
-        # not used
         if isinstance(self._data, bytes):
             self.object: Sign1Message = bytes2CoseSign1(
                 cbor2.dumps(cbor2.CBORTag(18, value=self._data)))
         elif isinstance(self._data, list):
             self.object: Sign1Message = cborlist2CoseSign1(self._data)
+        elif isinstance(self._data, cbor2.CBORTag) and self._data.tag == 18:
+            # COSE_Sign1 is CBOR tag 18; value can be list (decoded) or bytes
+            val = self._data.value
+            if isinstance(val, list):
+                self.object = cborlist2CoseSign1(val)
+            else:
+                self.object = bytes2CoseSign1(cbor2.dumps(self._data))
         else:
             raise UnsupportedMsoDataFormat(
-                f"MsoParser only supports raw bytes and list, a {type(data)} was provided"
+                f"MsoParser only supports raw bytes, list, or CBORTag(18); got {type(data)}"
             )
 
         self.object.key = None

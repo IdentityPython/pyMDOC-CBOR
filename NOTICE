@@ -1,0 +1,11 @@
+IdentityPython pyMDOC-CBOR
+https://github.com/IdentityPython/pyMDOC-CBOR
+
+This project aligns with the EU Digital Identity Wallet reference implementation:
+https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR
+
+Modifications in that repository are Copyright (c) European Commission
+and licensed under the Apache License, Version 2.0.
+
+This project is licensed under the Apache License, Version 2.0.
+See the LICENSE file for details.

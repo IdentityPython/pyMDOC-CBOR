@@ -8,7 +8,33 @@ on:
     branches: ["*"]
 
 jobs:
+  skip-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check.outputs.should_skip }}
+    steps:
+      - uses: actions/github-script@v7
+        id: check
+        with:
+          script: |
+            const branch = process.env.BRANCH || '';
+            const { data: { workflow_runs } } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              status: 'in_progress',
+            });
+            const otherRunning = workflow_runs.filter(
+              r => r.id != context.runId &&
+                r.name === context.workflow &&
+                (!branch || r.head_branch === branch)
+            );
+            core.setOutput('should_skip', otherRunning.length > 0 ? 'true' : 'false');
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+
   lint:
+    needs: skip-check
+    if: needs.skip-check.outputs.should_skip != 'true'
     name: flake8
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +55,8 @@ jobs:
           flake8 pymdoccbor
 
   isort:
+    needs: skip-check
+    if: needs.skip-check.outputs.should_skip != 'true'
     name: isort
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +76,8 @@ jobs:
           isort pymdoccbor --check-only --diff
 
   bandit:
+    needs: skip-check
+    if: needs.skip-check.outputs.should_skip != 'true'
     name: Bandit security scan
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +97,8 @@ jobs:
           bandit -r -x pymdoccbor/tests pymdoccbor -f txt
 
   radon:
+    needs: skip-check
+    if: needs.skip-check.outputs.should_skip != 'true'
     name: Radon complexity
     runs-on: ubuntu-latest
     steps:

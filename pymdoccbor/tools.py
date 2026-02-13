@@ -1,3 +1,4 @@
+# Aligns with https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR
 import json
 import random
 

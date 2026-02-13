@@ -28,7 +28,11 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    url="https://github.com/IdentityPython/pyMDL-MDOC",
+    url="https://github.com/IdentityPython/pyMDOC-CBOR",
+    project_urls={
+        "EUDI Wallet reference": "https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR",
+        "Source": "https://github.com/IdentityPython/pyMDOC-CBOR",
+    },
     author="Giuseppe De Marco",
     author_email="demarcog83@gmail.com",
     license="License :: OSI Approved :: Apache Software License",
