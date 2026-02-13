@@ -264,6 +264,10 @@ Other examples at [cbor official documentation](https://github.com/agronholm/cbo
 
 - [Python Certvalidator](https://github.com/wbond/certvalidator/blob/master/docs/usage.md)
 
+## EUDI Wallet reference implementation
+
+This project aligns with the [EU Digital Identity Wallet pyMDOC-CBOR](https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR) reference implementation. That repository may contain additional modifications for EUDI Wallet PID and mDL use cases (European Commission) since the EU Digital Identity Wallet pyMDOC-CBOR is a fork of this project.
+
 ## Authors and contributors
 
 - Giuseppe De Marco

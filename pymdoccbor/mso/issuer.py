@@ -1,3 +1,4 @@
+# Aligns with https://github.com/eu-digital-identity-wallet/pyMDOC-CBOR
 import datetime
 import hashlib
 import logging

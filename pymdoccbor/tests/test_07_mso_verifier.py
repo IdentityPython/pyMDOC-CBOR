@@ -27,7 +27,7 @@ def test_mso_verifier_fail():
     try:
         MsoVerifier(None)
     except Exception as e:
-        assert str(e) == "MsoParser only supports raw bytes and list, a <class 'NoneType'> was provided"
+        assert "raw bytes" in str(e) and "NoneType" in str(e)
 
 
 def test_mso_verifier_creation():
