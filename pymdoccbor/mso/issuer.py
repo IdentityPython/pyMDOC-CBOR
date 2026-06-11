@@ -4,13 +4,9 @@ import hashlib
 import logging
 import secrets
 import uuid
-from typing import Union
 
 import cbor2
 from cbor_diag import cbor2diag
-from cryptography import x509
-from cryptography.hazmat.primitives import serialization
-from cryptography.x509 import Certificate
 from pycose.headers import Algorithm
 from pycose.keys import CoseKey
 from pycose.messages import Sign1Message
@@ -18,7 +14,7 @@ from pycose.messages import Sign1Message
 from pymdoccbor import settings
 from pymdoccbor.exceptions import MsoPrivateKeyRequired
 from pymdoccbor.tools import shuffle_dict
-from pymdoccbor.x509 import selfsigned_x509cert
+from pymdoccbor.x509 import X509ChainSource, encode_x5chain, selfsigned_x509cert
 
 logger = logging.getLogger("pymdoccbor")
 
@@ -33,6 +29,7 @@ class MsoIssuer:
         data: dict,
         validity: dict,
         cert_path: str | None = None,
+        x509_chain: list[X509ChainSource] | None = None,
         key_label: str | None = None,
         user_pin: str | None = None,
         lib_path: str | None = None,
@@ -50,7 +47,11 @@ class MsoIssuer:
 
         :param data: dict: the data to sign
         :param validity: validity: the validity info of the mso
-        :param cert_path: str: the path to the certificate
+        :param cert_path: str: the path to a single certificate (PEM or DER)
+        :param x509_chain: list: X.509 chain for COSE header 33 (x5chain); each
+            item may be a file path, PEM/DER bytes, or a Certificate object.
+            The Document Signer certificate must be first. Mutually exclusive
+            with cert_path.
         :param key_label: str: key label
         :param user_pin: str: user pin
         :param lib_path: str: path to the library cryptographic library
@@ -97,11 +98,18 @@ class MsoIssuer:
         self.revocation = revocation
 
         self.cert_path = cert_path
+        self.x509_chain = x509_chain
         self.cert_info = cert_info
 
-        if not self.cert_path and (not self.cert_info or not self.private_key):
+        if self.cert_path and self.x509_chain:
+            raise ValueError("cert_path and x509_chain are mutually exclusive")
+
+        if not self.cert_path and not self.x509_chain and (
+            not self.cert_info or not self.private_key
+        ):
             raise ValueError(
-                "cert_path or cert_info with a private key must be provided to properly insert a certificate"
+                "cert_path, x509_chain, or cert_info with a private key must be "
+                "provided to properly insert a certificate"
             )
 
         alg_map = {"ES256": "sha256", "ES384": "sha384", "ES512": "sha512"}
@@ -216,35 +224,15 @@ class MsoIssuer:
         if self.revocation is not None:
             payload.update({"status": self.revocation})
 
-        if self.cert_path:
-            # Try to load the certificate file
-            with open(self.cert_path, "rb") as file:
-                certificate = file.read()
-            _parsed_cert: Union[Certificate, None] = None
-            try:
-                _parsed_cert = x509.load_pem_x509_certificate(certificate)
-            except Exception:
-                logger.error(
-                    f"Certificate at {self.cert_path} could not be loaded as PEM, trying DER"
-                )
-
-            if not _parsed_cert:
-                try:
-                    _parsed_cert = x509.load_der_x509_certificate(certificate)
-                except Exception:
-                    _err_msg = (
-                        f"Certificate at {self.cert_path} could not be loaded as DER"
-                    )
-                    logger.error(_err_msg)
-
-            if _parsed_cert:
-                cert = _parsed_cert
-            else:
-                raise Exception(f"Certificate at {self.cert_path} failed parse")
-            _cert = cert.public_bytes(getattr(serialization.Encoding, "DER"))
+        if self.x509_chain:
+            _cert = encode_x5chain(self.x509_chain)
+        elif self.cert_path:
+            _cert = encode_x5chain([self.cert_path])
         else:
             if not self.cert_info:
-                raise ValueError("cert_info must be provided if cert_path is not set")
+                raise ValueError(
+                    "cert_info must be provided if cert_path and x509_chain are not set"
+                )
 
             logger.warning(
                 "A self-signed certificate will be created using the provided "
@@ -261,9 +249,6 @@ class MsoIssuer:
                     Algorithm: self.alg,
                     # 33: _cert
                 },
-                # TODO: x509 (cbor2.CBORTag(33)) and federation trust_chain support (cbor2.CBORTag(27?)) here
-                # 33 means x509chain standing to rfc9360
-                # in both protected and unprotected for interop purpose .. for now.
                 uhdr={33: _cert},
                 payload=cbor2.dumps(
                     cbor2.CBORTag(24, cbor2.dumps(payload, canonical=True)),
@@ -281,11 +266,7 @@ class MsoIssuer:
                 phdr={
                     Algorithm: self.private_key.alg,
                     # KID: self.private_key.kid,
-                    # 33: _cert
                 },
-                # TODO: x509 (cbor2.CBORTag(33)) and federation trust_chain support (cbor2.CBORTag(27?)) here
-                # 33 means x509chain standing to rfc9360
-                # in both protected and unprotected for interop purpose .. for now.
                 uhdr={33: _cert},
                 payload=cbor2.dumps(
                     cbor2.CBORTag(24, cbor2.dumps(payload, canonical=True)),

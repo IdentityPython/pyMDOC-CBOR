@@ -126,6 +126,69 @@ assert mdoci.dumps()
 # >> mdoci.dumps() returns mdoc bytes
 ````
 
+### Issue an MDOC CBOR with X.509 certificate chain
+
+To embed a full `x5chain` (COSE header label 33) in the MSO unprotected header,
+pass `x509_chain` to `MdocCborIssuer.new()` or `MsoIssuer`. The Document Signer
+(DS) certificate must be first; intermediate certificates follow. The trusted
+root (IACA) is usually omitted.
+
+Each element of `x509_chain` is an `X509ChainSource` with one of these types:
+
+| Type | Meaning | Example |
+|------|---------|---------|
+| `str` | **File path** to a PEM or DER certificate (not PEM text inline) | `"certs/ds.pem"` |
+| `bytes` | PEM or DER content; PEM bundles with multiple certificates are expanded in order | `open("chain.pem", "rb").read()` |
+| `cryptography.x509.Certificate` | Certificate object already loaded in memory | `ds_cert` |
+
+A `str` value is always read as a filesystem path. To pass PEM text, encode it as
+`bytes` (for example `pem_text.encode("utf-8")`).
+
+````python
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from pymdoccbor.mdoc.issuer import MdocCborIssuer
+
+with open("certs/ds.pem", "rb") as f:
+    ds_cert = x509.load_pem_x509_certificate(f.read(), default_backend())
+
+mdoci = MdocCborIssuer(
+    private_key=PKEY,
+    alg="ES256",
+)
+
+mdoc = mdoci.new(
+    doctype="eu.europa.ec.eudiw.pid.1",
+    data=PID_DATA,
+    devicekeyinfo=PKEY,
+    validity={"issuance_date": "2025-01-17", "expiry_date": "2030-01-17"},
+    x509_chain=[
+        ds_cert,                              # Certificate object
+        "certs/intermediate.pem",             # file path
+        open("certs/backup-intermediate.der", "rb").read(),  # DER/PEM bytes
+    ],
+)
+````
+
+For a single DS certificate, `cert_path` remains supported and is equivalent to
+`x509_chain` with one entry. The two parameters are mutually exclusive.
+
+When issuing an MSO directly with `MsoIssuer`, use the same `x509_chain` parameter:
+
+````python
+from pymdoccbor.mso.issuer import MsoIssuer
+
+msoi = MsoIssuer(
+    data=PID_DATA,
+    private_key=PKEY,
+    alg="ES256",
+    validity={"issuance_date": "2025-01-17", "expiry_date": "2030-01-17"},
+    x509_chain=[ds_cert, intermediate_cert],
+)
+
+mso = msoi.sign(doctype="eu.europa.ec.eudiw.pid.1", device_key=DEVICE_KEY)
+````
+
 ### Issue an MSO alone
 
 MsoIssuer is a class that handles private keys, data processing, digests and signature operations.

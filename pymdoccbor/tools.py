@@ -19,20 +19,14 @@ def bytes2CoseSign1(data: bytes) -> Sign1Message:
     return decoded
 
 
-def cborlist2CoseSign1(data: list) -> Sign1Message:
+def cborlist2CoseSign1(data: list | tuple) -> Sign1Message:
     """
     Gets cbor2 decoded COSE Sign1 as a list and return a COSE_Sign1 object
 
-    :param data: list: the COSE Sign1 as a list
+    :param data: list | tuple: the COSE Sign1 as a list (cbor2 may decode arrays as tuples)
     :return: Sign1Message: the COSE Sign1 object
     """
-    decoded = Sign1Message.decode(
-        cbor2.dumps(
-            cbor2.CBORTag(18, value=data)
-        )
-    )
-
-    return decoded
+    return Sign1Message.from_cose_obj(list(data), allow_unknown_attributes=True)
 
 
 def pretty_print(cbor_loaded: dict) -> None:

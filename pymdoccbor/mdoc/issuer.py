@@ -15,6 +15,7 @@ from pycose.keys import CoseKey, EC2Key
 
 from pymdoccbor.mdoc.exceptions import InvalidStatusDescriptor
 from pymdoccbor.mso.issuer import MsoIssuer
+from pymdoccbor.x509 import X509ChainSource
 
 logger = logging.getLogger("pymdoccbor")
 
@@ -80,6 +81,7 @@ class MdocCborIssuer:
         validity: dict | None = None,
         devicekeyinfo: dict | CoseKey | str | None = None,
         cert_path: str | None = None,
+        x509_chain: list[X509ChainSource] | None = None,
         revocation: dict | None = None,
         status: dict | None = None
     ) -> dict:
@@ -90,7 +92,8 @@ class MdocCborIssuer:
         :param doctype: str: document type
         :param validity: dict: validity info
         :param devicekeyinfo: Union[dict, CoseKey, str]: device key info
-        :param cert_path: str: path to the certificate
+        :param cert_path: str: path to a single certificate (PEM or DER)
+        :param x509_chain: list: X.509 chain for the MSO x5chain header (label 33)
         :param revocation: dict: revocation status dict it may include status_list and identifier_list keys
         :param status: dict: status dict with uri and idx per draft-ietf-oauth-status-list
         :return: dict: signed mdoc
@@ -180,6 +183,7 @@ class MdocCborIssuer:
             msoi = MsoIssuer(
                 data=data,
                 cert_path=cert_path,
+                x509_chain=x509_chain,
                 hsm=self.hsm,
                 key_label=self.key_label,
                 user_pin=self.user_pin,
@@ -198,6 +202,7 @@ class MdocCborIssuer:
                 private_key=self.private_key,
                 alg=self.alg,
                 cert_path=cert_path,
+                x509_chain=x509_chain,
                 validity=validity,
                 revocation=revocation,
                 cert_info=self.cert_info

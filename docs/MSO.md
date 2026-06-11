@@ -51,8 +51,19 @@ protected header. Other elements  should not be present in the protected header.
 
 
 The DS certificate shall be included as a ‘x5chain’ element as described 
-in “draft-ietf-cose-x509-04”. It  shall be included as an 
-unprotected header element. 
+in RFC 9360. It shall be included as an unprotected header element (COSE label 33).
+
+At issuance time, pass `x509_chain` to `MsoIssuer` or `MdocCborIssuer.new()`:
+
+````
+msoi = MsoIssuer(
+    data=data,
+    private_key=ds_private_key,
+    alg="ES256",
+    validity={"issuance_date": "2025-01-17", "expiry_date": "2030-01-17"},
+    x509_chain=["ds.pem", "intermediate.pem"],
+)
+````
 
 
 The input for the digest function is the binary data of the  IssuerSignedItem. 

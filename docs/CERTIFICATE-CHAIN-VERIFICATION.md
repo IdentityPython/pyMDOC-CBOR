@@ -197,6 +197,40 @@ cert = x509.load_pem_x509_certificate(pem_data.encode(), default_backend())
 
 The DS certificate is automatically extracted from the mDOC's Mobile Security Object (MSO). It is embedded in the COSE_Sign1 structure's unprotected header (label 33).
 
+### Issuing an mDOC with an X.509 chain
+
+Since version 1.3.0, `MsoIssuer` and `MdocCborIssuer.new()` accept an `x509_chain`
+parameter to populate the COSE `x5chain` header (label 33) during MSO issuance.
+
+```python
+from pymdoccbor.mso.issuer import MsoIssuer
+
+msoi = MsoIssuer(
+    data=data,
+    private_key=ds_private_key,
+    alg="ES256",
+    validity={"issuance_date": "2025-01-17", "expiry_date": "2030-01-17"},
+    x509_chain=[
+        "certs/ds.pem",              # Document Signer (first)
+        "certs/intermediate.pem",    # optional intermediate(s)
+    ],
+)
+
+mso = msoi.sign(doctype="org.iso.18013.5.1.mDL", device_key=device_key)
+```
+
+Each chain entry may be:
+
+- a file path (PEM or DER; PEM bundles with multiple certificates are expanded in order),
+- raw PEM/DER bytes, or
+- a `cryptography.x509.Certificate` object.
+
+With a single certificate, the header value is encoded as DER `bytes`. With two or
+more certificates, it is encoded as a `list` of DER `bytes`, with the DS certificate
+first. The trusted root (IACA) is typically not included in the chain.
+
+`cert_path` (single certificate) and `x509_chain` are mutually exclusive.
+
 ## Certificate Chain Structure
 
 ```
