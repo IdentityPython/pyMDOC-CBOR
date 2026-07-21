@@ -35,7 +35,7 @@ setup(
     },
     author="Giuseppe De Marco",
     author_email="demarcog83@gmail.com",
-    license="License :: OSI Approved :: Apache Software License",
+    license="Apache-2.0",
     # scripts=[f'{_pkg_name}/bin/{_pkg_name}'],
     packages=find_packages(include=["pymdoccbor", "pymdoccbor.*"]),
     include_package_data=True,
