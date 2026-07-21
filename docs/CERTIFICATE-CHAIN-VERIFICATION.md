@@ -203,6 +203,7 @@ Since version 1.3.0, `MsoIssuer` and `MdocCborIssuer.new()` accept an `x509_chai
 parameter to populate the COSE `x5chain` header (label 33) during MSO issuance.
 
 ```python
+# skip in doc examples (illustrative; requires data, keys, and cert files on disk)
 from pymdoccbor.mso.issuer import MsoIssuer
 
 msoi = MsoIssuer(

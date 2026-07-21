@@ -14,7 +14,8 @@ from pycose.messages import Sign1Message
 from pymdoccbor import settings
 from pymdoccbor.exceptions import MsoPrivateKeyRequired
 from pymdoccbor.tools import shuffle_dict
-from pymdoccbor.x509 import X509ChainSource, encode_x5chain, selfsigned_x509cert
+from pymdoccbor.x509 import (X509ChainSource, encode_x5chain,
+                             selfsigned_x509cert)
 
 logger = logging.getLogger("pymdoccbor")
 

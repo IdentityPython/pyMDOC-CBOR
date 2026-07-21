@@ -145,6 +145,7 @@ A `str` value is always read as a filesystem path. To pass PEM text, encode it a
 `bytes` (for example `pem_text.encode("utf-8")`).
 
 ````python
+# skip in doc examples (illustrative; requires certs/ds.pem and PID_DATA)
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from pymdoccbor.mdoc.issuer import MdocCborIssuer
@@ -176,6 +177,7 @@ For a single DS certificate, `cert_path` remains supported and is equivalent to
 When issuing an MSO directly with `MsoIssuer`, use the same `x509_chain` parameter:
 
 ````python
+# skip in doc examples (illustrative; requires PID_DATA, ds_cert, intermediate_cert)
 from pymdoccbor.mso.issuer import MsoIssuer
 
 msoi = MsoIssuer(
