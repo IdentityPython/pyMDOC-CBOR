@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+import cbor2
 import pytest
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -183,3 +184,33 @@ def test_mdoc_cbor_issuer_x509_chain_in_issuer_auth():
     assert len(x5chain) == 2
     assert x5chain[0] == ds_cert.public_bytes(serialization.Encoding.DER)
     assert x5chain[1] == root_cert.public_bytes(serialization.Encoding.DER)
+
+
+def test_mso_issuer_validity_same_day():
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    msoi = MsoIssuer(
+        data=MICOV_DATA,
+        private_key=PKEY,
+        validity={"issuance_date": today, "expiry_date": today},
+        alg="ES256",
+        cert_info=CERT_DATA,
+    )
+
+    mso = msoi.sign()
+    payload = cbor2.loads(mso.payload)
+    mso_body = cbor2.loads(payload.value)
+    validity = mso_body["validityInfo"]
+
+    def _as_utc(dt):
+        if isinstance(dt, cbor2.CBORTag):
+            dt = dt.value
+        if isinstance(dt, str):
+            return datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        return dt.replace(tzinfo=timezone.utc)
+
+    signed = _as_utc(validity["signed"])
+    valid_from = _as_utc(validity["validFrom"])
+    valid_until = _as_utc(validity["validUntil"])
+
+    assert valid_from <= signed <= valid_until
+    assert valid_until.hour == 23 and valid_until.minute == 59 and valid_until.second == 59
