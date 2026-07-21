@@ -126,6 +126,192 @@ assert mdoci.dumps()
 # >> mdoci.dumps() returns mdoc bytes
 ````
 
+### Issue an MDOC CBOR with X.509 certificate chain
+
+To embed a full `x5chain` (COSE header label 33) in the MSO unprotected header,
+pass `x509_chain` to `MdocCborIssuer.new()` or `MsoIssuer`. The Document Signer
+(DS) certificate must be first; intermediate certificates follow. The trusted
+root (IACA) is usually omitted.
+
+Each element of `x509_chain` is an `X509ChainSource` with one of these types:
+
+| Type | Meaning | Example |
+|------|---------|---------|
+| `str` | **File path** to a PEM or DER certificate (not PEM text inline) | `"certs/ds.pem"` |
+| `bytes` | PEM or DER content; PEM bundles with multiple certificates are expanded in order | `open("chain.pem", "rb").read()` |
+| `cryptography.x509.Certificate` | Certificate object already loaded in memory | `ds_cert` |
+
+A `str` value is always read as a filesystem path. To pass PEM text, encode it as
+`bytes` (for example `pem_text.encode("utf-8")`).
+
+````python
+import os
+import tempfile
+from datetime import datetime, timedelta, timezone
+
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.x509.oid import NameOID
+from pymdoccbor.mdoc.issuer import MdocCborIssuer
+
+# Demo chain: root CA signs the Document Signer certificate
+root_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
+root_name = x509.Name([
+    x509.NameAttribute(NameOID.COUNTRY_NAME, "IT"),
+    x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Example"),
+    x509.NameAttribute(NameOID.COMMON_NAME, "Example Root CA"),
+])
+root_cert = (
+    x509.CertificateBuilder()
+    .subject_name(root_name)
+    .issuer_name(root_name)
+    .public_key(root_key.public_key())
+    .serial_number(x509.random_serial_number())
+    .not_valid_before(datetime.now(timezone.utc) - timedelta(days=1))
+    .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+    .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+    .sign(root_key, hashes.SHA256(), default_backend())
+)
+
+ds_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
+ds_cert = (
+    x509.CertificateBuilder()
+    .subject_name(x509.Name([
+        x509.NameAttribute(NameOID.COUNTRY_NAME, "IT"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Example"),
+        x509.NameAttribute(NameOID.COMMON_NAME, "Example DS"),
+    ]))
+    .issuer_name(root_name)
+    .public_key(ds_key.public_key())
+    .serial_number(x509.random_serial_number())
+    .not_valid_before(datetime.now(timezone.utc) - timedelta(days=1))
+    .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+    .sign(root_key, hashes.SHA256(), default_backend())
+)
+
+PKEY = {
+    "KTY": "EC2",
+    "CURVE": "P_256",
+    "ALG": "ES256",
+    "D": os.urandom(32),
+    "KID": b"demo-kid",
+}
+PID_DATA = {
+    "eu.europa.ec.eudiw.pid.1": {
+        "family_name": "Raffaello",
+        "given_name": "Mascetti",
+        "birth_date": "1922-03-13",
+    }
+}
+
+# x509_chain accepts Certificate objects, file paths, and PEM/DER bytes
+with tempfile.TemporaryDirectory() as certs_dir:
+    intermediate_pem = os.path.join(certs_dir, "intermediate.pem")
+    with open(intermediate_pem, "wb") as f:
+        f.write(root_cert.public_bytes(serialization.Encoding.PEM))
+    intermediate_der = root_cert.public_bytes(serialization.Encoding.DER)
+
+    mdoci = MdocCborIssuer(private_key=PKEY, alg="ES256")
+    mdoc = mdoci.new(
+        doctype="eu.europa.ec.eudiw.pid.1",
+        data=PID_DATA,
+        devicekeyinfo=PKEY,
+        validity={"issuance_date": "2025-01-17", "expiry_date": "2030-01-17"},
+        x509_chain=[
+            ds_cert,              # Certificate object
+            intermediate_pem,     # file path
+            intermediate_der,     # DER/PEM bytes
+        ],
+    )
+
+assert mdoc
+````
+
+For a single DS certificate, `cert_path` remains supported and is equivalent to
+`x509_chain` with one entry. The two parameters are mutually exclusive.
+
+When issuing an MSO directly with `MsoIssuer`, use the same `x509_chain` parameter:
+
+````python
+import os
+from datetime import datetime, timedelta, timezone
+
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.x509.oid import NameOID
+from pymdoccbor.mso.issuer import MsoIssuer
+
+root_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
+root_name = x509.Name([
+    x509.NameAttribute(NameOID.COUNTRY_NAME, "IT"),
+    x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Example"),
+    x509.NameAttribute(NameOID.COMMON_NAME, "Example Root CA"),
+])
+root_cert = (
+    x509.CertificateBuilder()
+    .subject_name(root_name)
+    .issuer_name(root_name)
+    .public_key(root_key.public_key())
+    .serial_number(x509.random_serial_number())
+    .not_valid_before(datetime.now(timezone.utc) - timedelta(days=1))
+    .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+    .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+    .sign(root_key, hashes.SHA256(), default_backend())
+)
+
+ds_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
+ds_cert = (
+    x509.CertificateBuilder()
+    .subject_name(x509.Name([
+        x509.NameAttribute(NameOID.COUNTRY_NAME, "IT"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Example"),
+        x509.NameAttribute(NameOID.COMMON_NAME, "Example DS"),
+    ]))
+    .issuer_name(root_name)
+    .public_key(ds_key.public_key())
+    .serial_number(x509.random_serial_number())
+    .not_valid_before(datetime.now(timezone.utc) - timedelta(days=1))
+    .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+    .sign(root_key, hashes.SHA256(), default_backend())
+)
+
+PKEY = {
+    "KTY": "EC2",
+    "CURVE": "P_256",
+    "ALG": "ES256",
+    "D": os.urandom(32),
+    "KID": b"demo-kid",
+}
+PID_DATA = {
+    "eu.europa.ec.eudiw.pid.1": {
+        "family_name": "Raffaello",
+        "given_name": "Mascetti",
+        "birth_date": "1922-03-13",
+    }
+}
+DEVICE_KEY = {
+    1: 2,
+    -1: 1,
+    -2: os.urandom(32),
+    -3: os.urandom(32),
+}
+
+msoi = MsoIssuer(
+    data=PID_DATA,
+    private_key=PKEY,
+    alg="ES256",
+    validity={"issuance_date": "2025-01-17", "expiry_date": "2030-01-17"},
+    x509_chain=[ds_cert, root_cert],
+)
+
+mso = msoi.sign(doctype="eu.europa.ec.eudiw.pid.1", device_key=DEVICE_KEY)
+assert mso
+````
+
 ### Issue an MSO alone
 
 MsoIssuer is a class that handles private keys, data processing, digests and signature operations.

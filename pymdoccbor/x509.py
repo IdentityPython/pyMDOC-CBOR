@@ -8,6 +8,68 @@ from cryptography.x509 import Certificate
 from cryptography.x509.oid import NameOID
 from pycose.keys import CoseKey
 
+X509ChainSource = Union[str, bytes, Certificate]
+
+
+def load_x509_certificates_from_bytes(data: bytes) -> list[Certificate]:
+    """
+    Load one or more X.509 certificates from PEM or DER bytes.
+
+    :param data: bytes: PEM (single or bundle) or DER certificate data
+    :return: list[Certificate]: parsed certificates in file order
+    """
+    try:
+        certs = x509.load_pem_x509_certificates(data)
+        if certs:
+            return certs
+    except ValueError:
+        pass
+
+    return [x509.load_der_x509_certificate(data)]
+
+
+def load_x509_certificates_from_source(source: X509ChainSource) -> list[Certificate]:
+    """
+    Load one or more X.509 certificates from a file path, bytes, or Certificate.
+
+    :param source: str | bytes | Certificate: certificate source
+    :return: list[Certificate]: parsed certificates
+    """
+    if isinstance(source, Certificate):
+        return [source]
+
+    if isinstance(source, str):
+        with open(source, "rb") as cert_file:
+            data = cert_file.read()
+    else:
+        data = source
+
+    return load_x509_certificates_from_bytes(data)
+
+
+def encode_x5chain(sources: list[X509ChainSource]) -> Union[bytes, list[bytes]]:
+    """
+    Build the COSE x5chain value (header label 33) from certificate sources.
+
+    A single certificate is encoded as DER bytes; multiple certificates are
+    encoded as a list of DER bytes with the Document Signer certificate first.
+
+    :param sources: list of file paths, PEM/DER bytes, or Certificate objects
+    :return: bytes or list[bytes]: value for COSE unprotected header 33
+    """
+    der_certs: list[bytes] = []
+    for source in sources:
+        for cert in load_x509_certificates_from_source(source):
+            der_certs.append(cert.public_bytes(serialization.Encoding.DER))
+
+    if not der_certs:
+        raise ValueError("x509_chain must contain at least one certificate")
+
+    if len(der_certs) == 1:
+        return der_certs[0]
+
+    return der_certs
+
 
 def selfsigned_x509cert(
     cert_info: dict[str, Any],
