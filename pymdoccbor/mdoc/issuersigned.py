@@ -24,12 +24,16 @@ class IssuerSigned:
     ]
     """
 
-    def __init__(self, nameSpaces: dict, issuerAuth: Union[cbor2.CBORTag, dict, bytes]) -> None:
+    def __init__(
+        self,
+        nameSpaces: dict,
+        issuerAuth: Union[cbor2.CBORTag, list, tuple, dict, bytes],
+    ) -> None:
         """
         Initialize the IssuerSigned object
 
         :param nameSpaces: dict: the nameSpaces of the document
-        :param issuerAuth: Union[dict, bytes]: the issuerAuth info of the document
+        :param issuerAuth: COSE_Sign1 as list/tuple/bytes/CBORTag(18)
         """
 
         self.namespaces: dict = nameSpaces

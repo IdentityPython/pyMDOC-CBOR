@@ -11,6 +11,7 @@ from pymdoccbor.mso.issuer import MsoIssuer
 from pymdoccbor.tests.cert_data import CERT_DATA
 from pymdoccbor.tests.pid_data import PID_DATA
 from pymdoccbor.tests.pkey import PKEY, PKEY_ED25519, PKEY_RSA
+from pymdoccbor.tools import bytes2CoseSign1
 
 
 def extract_mso(mdoc: dict):
@@ -39,7 +40,8 @@ def test_mso_writer():
 
     mso = msoi.sign()
 
-    Sign1Message.decode(mso.encode())
+    # Use our helper: pycose Sign1Message.decode breaks on cbor2 >= 6 (tuple)
+    assert isinstance(bytes2CoseSign1(mso.encode()), Sign1Message)
 
 
 def test_mdoc_issuer():
