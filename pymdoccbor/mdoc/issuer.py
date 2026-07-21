@@ -15,6 +15,7 @@ from pycose.keys import CoseKey, EC2Key
 
 from pymdoccbor.mdoc.exceptions import InvalidStatusDescriptor
 from pymdoccbor.mso.issuer import MsoIssuer
+from pymdoccbor.tools import thaw_cbor
 
 logger = logging.getLogger("pymdoccbor")
 
@@ -228,7 +229,8 @@ class MdocCborIssuer:
                             ns: [v for k, v in dgst.items()]
                             for ns, dgst in msoi.disclosure_map.items()
                         },
-                        "issuerAuth": cbor2.loads(mso_cbor)
+                        # thaw_cbor: cbor2 >= 6 returns tuple/frozendict
+                        "issuerAuth": thaw_cbor(cbor2.loads(mso_cbor))
                     },
                 }
             ],

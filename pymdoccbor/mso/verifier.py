@@ -2,7 +2,7 @@
 import hashlib
 import logging
 from datetime import datetime, timezone
-from typing import Union
+from typing import Sequence, Union
 
 import cbor2
 import cryptography
@@ -31,11 +31,13 @@ class MsoVerifier:
         structure as defined in RFC 8152.
     """
 
-    def __init__(self, data: Union[cbor2.CBORTag, bytes, list]) -> None:
+    def __init__(
+        self, data: Union[cbor2.CBORTag, bytes, list, tuple, Sequence]
+    ) -> None:
         """
         Initialize the MsoParser object
 
-        :param data: Union[cbor2.CBORTag, bytes, list]: the data to parse
+        :param data: Union[cbor2.CBORTag, bytes, list, tuple]: the data to parse
         """
 
         self._data = data
@@ -43,18 +45,20 @@ class MsoVerifier:
         if isinstance(self._data, bytes):
             self.object: Sign1Message = bytes2CoseSign1(
                 cbor2.dumps(cbor2.CBORTag(18, value=self._data)))
-        elif isinstance(self._data, list):
+        elif isinstance(self._data, (list, tuple)):
+            # cbor2 >= 6 decodes arrays as tuple
             self.object: Sign1Message = cborlist2CoseSign1(self._data)
         elif isinstance(self._data, cbor2.CBORTag) and self._data.tag == 18:
-            # COSE_Sign1 is CBOR tag 18; value can be list (decoded) or bytes
+            # COSE_Sign1 is CBOR tag 18; value can be list/tuple (decoded) or bytes
             val = self._data.value
-            if isinstance(val, list):
+            if isinstance(val, (list, tuple)):
                 self.object = cborlist2CoseSign1(val)
             else:
                 self.object = bytes2CoseSign1(cbor2.dumps(self._data))
         else:
             raise UnsupportedMsoDataFormat(
-                f"MsoParser only supports raw bytes, list, or CBORTag(18); got {type(data)}"
+                f"MsoParser only supports raw bytes, list, tuple, or "
+                f"CBORTag(18); got {type(data)}"
             )
 
         self.object.key = None

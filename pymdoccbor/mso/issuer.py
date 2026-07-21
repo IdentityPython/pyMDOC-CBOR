@@ -164,6 +164,19 @@ class MsoIssuer:
         """
         return dt.isoformat().split(".")[0] + "Z"
 
+    @staticmethod
+    def parse_date(date_str: str, *, end_of_day: bool = False) -> datetime.datetime:
+        """
+        Parse a date-only string (YYYY-MM-DD) into a datetime.
+
+        Date-only expiry values are interpreted as end-of-day so that
+        validityInfo.signed remains within [validFrom, validUntil].
+        """
+        dt = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+        if end_of_day:
+            dt = dt.replace(hour=23, minute=59, second=59)
+        return dt
+
     def sign(
         self,
         device_key: dict | None = None,
@@ -181,16 +194,12 @@ class MsoIssuer:
         """
 
         utcnow = datetime.datetime.utcnow()
-        valid_from = datetime.datetime.strptime(
-            self.validity["issuance_date"], "%Y-%m-%d"
-        )
+        valid_from = self.parse_date(self.validity["issuance_date"])
 
         if settings.PYMDOC_EXP_DELTA_HOURS:
             exp = utcnow + datetime.timedelta(hours=settings.PYMDOC_EXP_DELTA_HOURS)
         else:
-            # five years
-            exp = datetime.datetime.strptime(self.validity["expiry_date"], "%Y-%m-%d")
-            # exp = utcnow + datetime.timedelta(hours=(24 * 365) * 5)
+            exp = self.parse_date(self.validity["expiry_date"], end_of_day=True)
 
         if utcnow > valid_from:
             valid_from = utcnow
